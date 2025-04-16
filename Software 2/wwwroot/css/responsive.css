@@ -1,0 +1,68 @@
+/* Mobile First Approach */
+@media (max-width: 767.98px) {
+    .hero-section {
+        padding: 3rem 0;
+        text-align: center;
+    }
+
+    .display-4 {
+        font-size: 2rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 0.75rem;
+    }
+
+    .stats-section .col-md-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .footer {
+        text-align: center;
+    }
+
+        .footer .text-md-end {
+            text-align: center !important;
+            margin-top: 1.5rem;
+        }
+}
+
+/* Tablet Optimizations */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .display-4 {
+        font-size: 2.25rem;
+    }
+
+    .container {
+        max-width: 95%;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1400px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar, .footer {
+        display: none;
+    }
+
+    body {
+        background-color: white !important;
+        color: black !important;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+}
