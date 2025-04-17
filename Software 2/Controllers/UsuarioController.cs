@@ -20,28 +20,40 @@ namespace Software_2.Controllers
         }
 
         // Controllers/UsuarioController.cs
-        [HttpPost("/Crear")]
+        [HttpPost("/CrearUsuario")]
         public IActionResult RegistrarUsuario([FromBody] UsuarioDTO usuarioDTO)
         {
-            // Mapear el DTO a la entidad Usuario
-            var usuario = new Usuario
+            try
             {
-                IdRol = usuarioDTO.IdRol,
-                IdTipoDocumento = usuarioDTO.IdTipoDocumento,
-                NumeroDocumento = usuarioDTO.NumeroDocumento,
-                NombreUsuario = usuarioDTO.NombreUsuario,
-                ApellidoUsuario = usuarioDTO.ApellidoUsuario,
-                TelUsuario = usuarioDTO.TelUsuario,
-                CorreoUsuario = usuarioDTO.CorreoUsuario,
-                ContraseñaUsuario = ContraseñaHasher.Encrypt(usuarioDTO.ContraseñaUsuario),
-                Activo = usuarioDTO.Activo
-            };
+                // Mapear el DTO a la entidad Usuario
+                var usuario = new Usuario
+                {
+                    IdRol = usuarioDTO.IdRol,
+                    IdTipoDocumento = usuarioDTO.IdTipoDocumento,
+                    NumeroDocumento = usuarioDTO.NumeroDocumento,
+                    NombreUsuario = usuarioDTO.NombreUsuario,
+                    ApellidoUsuario = usuarioDTO.ApellidoUsuario,
+                    TelUsuario = usuarioDTO.TelUsuario,
+                    CorreoUsuario = usuarioDTO.CorreoUsuario,
+                    ContraseñaUsuario = ContraseñaHasher.Encrypt(usuarioDTO.ContraseñaUsuario),
+                    Activo = usuarioDTO.Activo
+                };
 
-            _usuarioService.RegistrarUsuario(usuario);
-            return CreatedAtAction(nameof(ObtenerUsuario), new { id = usuario.IdUsuario }, "Usuario registrado.");
+                _usuarioService.RegistrarUsuario(usuario);
+                return CreatedAtAction(nameof(ObtenerUsuario), new { id = usuario.IdUsuario }, "Usuario registrado.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    Error = "Error al crear Usuario",
+                    Detalle = ex.Message
+                });
+            }
+           
         }
 
-        [HttpGet("{id}/Obtener 1")]
+        [HttpGet("{id}/ObtenerUno")]
         public IActionResult ObtenerUsuario(int id)
         {
             var usuario = _usuarioService.ObtenerUsuario(id);

@@ -9,7 +9,7 @@ namespace Software_2.Services
     {
         private readonly UsuariosRepository _usuariosRepository;
 
-        // Constructor que recibe el repositorio por inyección de dependencia
+
         public UsuarioService(UsuariosRepository usuariosRepository)
         {
             _usuariosRepository = usuariosRepository;

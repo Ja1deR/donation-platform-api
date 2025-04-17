@@ -17,6 +17,8 @@ var connectionString = builder.Configuration.GetConnectionString("cadena");
 
 builder.Services.AddScoped<UsuariosRepository>(provider => new UsuariosRepository(connectionString));
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<FundacionRepository>(provider => new FundacionRepository(connectionString));
+builder.Services.AddScoped<FundacionService>();
 
 // Configurar Swagger
 builder.Services.AddEndpointsApiExplorer();
