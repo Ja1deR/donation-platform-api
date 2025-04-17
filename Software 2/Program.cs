@@ -1,31 +1,43 @@
 using Microsoft.EntityFrameworkCore;
 using Software_2.Data;
+using Software_2.Repositories;
+using Software_2.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+// Configurar servicios
+builder.Services.AddControllers();
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Cadena")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("cadena")));
+
+
+var connectionString = builder.Configuration.GetConnectionString("cadena");
+
+builder.Services.AddScoped<UsuariosRepository>(provider => new UsuariosRepository(connectionString));
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<FundacionRepository>(provider => new FundacionRepository(connectionString));
+builder.Services.AddScoped<FundacionService>();
+
+// Configurar Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+// Configurar el pipeline HTTP
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
-app.MapRazorPages();
+app.MapControllers();
 
 app.Run();
