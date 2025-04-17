@@ -1,4 +1,5 @@
-﻿using Software_2.Repositories;
+﻿
+using Software_2.Repositories;
 using Software_2.Models;
 using System.Collections.Generic;
 
@@ -37,6 +38,10 @@ namespace Software_2.Services
         public void EliminarUsuario(int id)
         {
             _usuariosRepository.EliminarUsuario(id);
+        }
+        public Usuario ObtenerUsuarioInactivo(int id)
+        {
+            return _usuariosRepository.ObtenerUsuarioIncluidoInactivo(id);
         }
     }
 }

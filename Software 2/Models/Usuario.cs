@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Software_2.Models;
 
@@ -37,9 +38,11 @@ public partial class Usuario
 
     public virtual ICollection<Fundación> Fundacións { get; set; } = new List<Fundación>();
 
-    public virtual Role IdRolNavigation { get; set; } = null!;
+    [ValidateNever]
+    public virtual Role? IdRolNavigation { get; set; }
 
-    public virtual TipoDocumento IdTipoDocumentoNavigation { get; set; } = null!;
+    [ValidateNever]
+    public virtual TipoDocumento? IdTipoDocumentoNavigation { get; set; }
 
     public virtual ICollection<Notificacione> Notificaciones { get; set; } = new List<Notificacione>();
 }

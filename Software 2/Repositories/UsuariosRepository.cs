@@ -1,5 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Software_2.Models;
+using System;
+using System.Text.Json;
 using System.Collections.Generic;
 using System.Data;
 
@@ -116,6 +118,10 @@ namespace Software_2.Repositories
                 SqlCommand command = new SqlCommand("UpdateUser", connection);
                 command.CommandType = CommandType.StoredProcedure;
 
+                // Log parameters for debugging
+                Console.WriteLine($"Actualizando usuario ID: {id}");
+                Console.WriteLine($"Nuevos valores: {System.Text.Json.JsonSerializer.Serialize(usuario)}");
+
                 command.Parameters.AddWithValue("@ID_usuario", id);
                 command.Parameters.AddWithValue("@ID_rol", usuario.IdRol);
                 command.Parameters.AddWithValue("@ID_tipo_documento", usuario.IdTipoDocumento);
@@ -124,10 +130,13 @@ namespace Software_2.Repositories
                 command.Parameters.AddWithValue("@Apellido_usuario", usuario.ApellidoUsuario);
                 command.Parameters.AddWithValue("@Tel_usuario", usuario.TelUsuario ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Correo_usuario", usuario.CorreoUsuario);
-                command.Parameters.AddWithValue("@Contraseña_usuario", ContraseñaHasher.Encrypt(usuario.ContraseñaUsuario));
+                command.Parameters.AddWithValue("@Contraseña_usuario", usuario.ContraseñaUsuario); // Ya viene encriptada
                 command.Parameters.AddWithValue("@Activo", usuario.Activo);
 
-                command.ExecuteNonQuery();
+                int rowsAffected = command.ExecuteNonQuery();
+
+                if (rowsAffected == 0)
+                    throw new Exception("Ningún registro fue actualizado");
             }
         }
 
@@ -142,6 +151,37 @@ namespace Software_2.Repositories
                 command.Parameters.AddWithValue("@ID_usuario", id);
                 command.ExecuteNonQuery();
             }
+        }
+        public Usuario ObtenerUsuarioIncluidoInactivo(int id)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("GetUserIncludingInactive", connection);
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("@ID_usuario", id);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    return reader.Read() ? MapearUsuario(reader) : null;
+                }
+            }
+        }
+        private Usuario MapearUsuario(SqlDataReader reader)
+        {
+            return new Usuario
+            {
+                IdUsuario = reader.GetInt32(reader.GetOrdinal("ID_usuario")),
+                IdRol = reader.GetInt32(reader.GetOrdinal("ID_rol")),
+                IdTipoDocumento = reader.GetInt32(reader.GetOrdinal("ID_tipo_documento")),
+                NumeroDocumento = reader.GetString(reader.GetOrdinal("Numero_documento")),
+                NombreUsuario = reader.GetString(reader.GetOrdinal("Nombre_usuario")),
+                ApellidoUsuario = reader.GetString(reader.GetOrdinal("Apellido_usuario")),
+                TelUsuario = reader.IsDBNull(reader.GetOrdinal("Tel_usuario")) ? null : reader.GetString(reader.GetOrdinal("Tel_usuario")),
+                CorreoUsuario = reader.GetString(reader.GetOrdinal("Correo_usuario")),
+                ContraseñaUsuario = reader.GetString(reader.GetOrdinal("Contraseña_usuario")),
+                Activo = reader.GetBoolean(reader.GetOrdinal("Activo"))
+            };
         }
     }
 }

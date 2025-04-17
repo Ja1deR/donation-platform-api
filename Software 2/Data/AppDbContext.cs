@@ -389,6 +389,8 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.IdUsuario).HasName("PK__Usuarios__DF3D4252DE2473BB");
 
+            entity.ToTable("Usuarios");
+
             entity.Property(e => e.IdUsuario).HasColumnName("ID_usuario");
             entity.Property(e => e.Activo).HasDefaultValue(true);
             entity.Property(e => e.ApellidoUsuario)
@@ -425,15 +427,20 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("Ultimo_acceso");
 
-            entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Usuarios)
+            entity.HasOne(d => d.IdRolNavigation)
+                .WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdRol)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientNoAction)
                 .HasConstraintName("FK_Usuarios_Roles");
 
-            entity.HasOne(d => d.IdTipoDocumentoNavigation).WithMany(p => p.Usuarios)
+            entity.HasOne(d => d.IdTipoDocumentoNavigation)
+                .WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdTipoDocumento)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientNoAction)
                 .HasConstraintName("FK_Usuarios_Tipo_Documento");
+
+            entity.Navigation(e => e.IdRolNavigation).AutoInclude(false);
+            entity.Navigation(e => e.IdTipoDocumentoNavigation).AutoInclude(false);
         });
 
         OnModelCreatingPartial(modelBuilder);
