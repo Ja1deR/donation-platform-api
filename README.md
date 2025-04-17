@@ -1,1 +1,1 @@
-# Software 2 D: (manos nos van a faltar pa lograrla)
+# Software 2 D: (récenele a dios pa lograrla)
