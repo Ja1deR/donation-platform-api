@@ -1,1 +1,1 @@
-# Software 2
+# Software 2 (récenle a dios pa lograrla)
