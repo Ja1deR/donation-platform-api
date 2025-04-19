@@ -33,7 +33,7 @@ namespace Software_2.Repositories
                 command.Parameters.AddWithValue("@Apellido_usuario", usuario.ApellidoUsuario);
                 command.Parameters.AddWithValue("@Tel_usuario", usuario.TelUsuario ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Correo_usuario", usuario.CorreoUsuario);
-                command.Parameters.AddWithValue("@Contraseña_usuario", ContraseñaHasher.Encrypt(usuario.ContraseñaUsuario));
+                command.Parameters.AddWithValue("@Contraseña_usuario", usuario.ContraseñaUsuario);
                 command.Parameters.AddWithValue("@Activo", usuario.Activo);
 
                 // Obtener ID 
@@ -164,6 +164,38 @@ namespace Software_2.Repositories
                 using (var reader = command.ExecuteReader())
                 {
                     return reader.Read() ? MapearUsuario(reader) : null;
+                }
+            }
+        }
+
+        public Usuario ObtenerUsuarioPorCorreo(string correo)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("GetUser", connection);
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("@Correo_usuario", correo);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new Usuario
+                        {
+                            IdUsuario = reader.GetInt32("ID_usuario"),
+                            IdRol = reader.GetInt32("ID_rol"),
+                            IdTipoDocumento = reader.GetInt32("ID_tipo_documento"),
+                            NumeroDocumento = reader.GetString("Numero_documento"),
+                            NombreUsuario = reader.GetString("Nombre_usuario"),
+                            ApellidoUsuario = reader.GetString("Apellido_usuario"),
+                            TelUsuario = reader.IsDBNull("Tel_usuario") ? null : reader.GetString("Tel_usuario"),
+                            CorreoUsuario = reader.GetString("Correo_usuario"),
+                            ContraseñaUsuario = reader.GetString("Contraseña_usuario"),
+                            Activo = reader.GetBoolean("Activo")
+                        };
+                    }
+                    return null;
                 }
             }
         }

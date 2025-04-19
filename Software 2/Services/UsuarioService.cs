@@ -43,5 +43,9 @@ namespace Software_2.Services
         {
             return _usuariosRepository.ObtenerUsuarioIncluidoInactivo(id);
         }
+        public Usuario ObtenerUsuarioPorCorreo(string correo)
+        {
+            return _usuariosRepository.ObtenerUsuarioPorCorreo(correo);
+        }
     }
 }

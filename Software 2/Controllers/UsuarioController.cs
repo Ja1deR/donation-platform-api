@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using Software_2.Models;
 using Software_2.Services;
 using System.Collections.Generic;
@@ -17,6 +18,38 @@ namespace Software_2.Controllers
         public UsuarioController(UsuarioService usuarioService)
         {
             _usuarioService = usuarioService;
+        }
+
+
+        [HttpPost("/Login")]
+        public IActionResult Login([FromBody] LoginDTO loginDTO)
+        {
+            try
+            {
+                var usuario = _usuarioService.ObtenerUsuarioPorCorreo(loginDTO.CorreoUsuario);
+                if (usuario == null)
+                    return NotFound(new { Error = "Usuario no encontrado" });
+
+                // Verificar contraseña
+                var contraseñaEncriptada = ContraseñaHasher.Encrypt(loginDTO.Contraseña);
+                if (usuario.ContraseñaUsuario != contraseñaEncriptada)
+                    return Unauthorized(new { Error = "Contraseña incorrecta" });
+
+                return Ok(new
+                {
+                    Mensaje = "Login exitoso",
+                    Usuario = new
+                    {
+                        usuario.IdUsuario,
+                        usuario.CorreoUsuario,
+                        Rol = usuario.IdRol
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
         }
 
         // Controllers/UsuarioController.cs
