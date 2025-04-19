@@ -5,6 +5,13 @@ using Newtonsoft.Json;
 using Software_2.Models;
 using Software_2.Services;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using Software_2.Data;
 
 namespace Software_2.Controllers
 {
@@ -14,36 +21,147 @@ namespace Software_2.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly UsuarioService _usuarioService;
+        private readonly IConfiguration _config;
+        private readonly AppDbContext _context;
 
-        public UsuarioController(UsuarioService usuarioService)
+        public UsuarioController(
+            UsuarioService usuarioService,
+            IConfiguration config,
+            AppDbContext context)
         {
             _usuarioService = usuarioService;
+            _config = config;
+            _context = context;
         }
 
 
+        // En UsuarioController.cs
         [HttpPost("/Login")]
-        public IActionResult Login([FromBody] LoginDTO loginDTO)
+        public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
             try
             {
                 var usuario = _usuarioService.ObtenerUsuarioPorCorreo(loginDTO.CorreoUsuario);
                 if (usuario == null)
-                    return NotFound(new { Error = "Usuario no encontrado" });
+                    return Unauthorized(new { Error = "Credenciales inválidas" });
 
-                // Verificar contraseña
-                var contraseñaEncriptada = ContraseñaHasher.Encrypt(loginDTO.Contraseña);
+                string contraseñaEncriptada = ContraseñaHasher.Encrypt(loginDTO.Contraseña);
                 if (usuario.ContraseñaUsuario != contraseñaEncriptada)
-                    return Unauthorized(new { Error = "Contraseña incorrecta" });
+                    return Unauthorized(new { Error = "Credenciales inválidas" });
+
+                // Generar Access Token
+                var accessToken = GenerateJwtToken(usuario);
+
+                // Generar Refresh Token
+                var refreshToken = new RefreshToken
+                {
+                    Token = GenerateRefreshToken(),
+                    Expires = DateTime.UtcNow.AddDays(_config.GetValue<int>("Jwt:RefreshTokenExpireDays")),
+                    IdUsuario = usuario.IdUsuario
+                };
+
+                // Guardar en BD
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        _context.RefreshTokens.Add(refreshToken);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
 
                 return Ok(new
                 {
-                    Mensaje = "Login exitoso",
-                    Usuario = new
-                    {
-                        usuario.IdUsuario,
-                        usuario.CorreoUsuario,
-                        Rol = usuario.IdRol
-                    }
+                    AccessToken = accessToken.TokenString,
+                    RefreshToken = refreshToken.Token,
+                    ExpiraEn = accessToken.Expires,
+                    Usuario = new { usuario.IdUsuario, usuario.CorreoUsuario, usuario.IdRol }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        // Métodos auxiliares
+        private (string TokenString, DateTime Expires) GenerateJwtToken(Usuario usuario)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
+            var expires = DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:AccessTokenExpireMinutes"));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+            new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+            new Claim(ClaimTypes.Email, usuario.CorreoUsuario),
+            new Claim(ClaimTypes.Role, usuario.IdRol.ToString())
+        }),
+                Expires = expires,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _config["Jwt:Issuer"],
+                Audience = _config["Jwt:Audience"]
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return (tokenHandler.WriteToken(token), expires);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
+        // En UsuarioController.cs
+        public class RefreshTokenRequest
+        {
+            public string RefreshToken { get; set; } = null!;
+        }
+
+        [HttpPost("/refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            try
+            {
+                var refreshToken = await _context.RefreshTokens
+                    .Include(rt => rt.Usuario)
+                    .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken);
+
+                if (refreshToken == null || refreshToken.IsExpired)
+                    return Unauthorized(new { Error = "Refresh token inválido o expirado" });
+
+                // Generar nuevo access token
+                var accessToken = GenerateJwtToken(refreshToken.Usuario);
+
+                // Rotar refresh token (opcional pero recomendado)
+                _context.RefreshTokens.Remove(refreshToken);
+                var newRefreshToken = new RefreshToken
+                {
+                    Token = GenerateRefreshToken(),
+                    Expires = DateTime.UtcNow.AddDays(_config.GetValue<int>("Jwt:RefreshTokenExpireDays")),
+                    IdUsuario = refreshToken.IdUsuario
+                };
+                _context.RefreshTokens.Add(newRefreshToken);
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    AccessToken = accessToken.TokenString,
+                    RefreshToken = newRefreshToken.Token,
+                    ExpiraEn = accessToken.Expires
                 });
             }
             catch (Exception ex)

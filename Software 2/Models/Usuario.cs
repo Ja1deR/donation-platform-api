@@ -45,4 +45,5 @@ public partial class Usuario
     public virtual TipoDocumento? IdTipoDocumentoNavigation { get; set; }
 
     public virtual ICollection<Notificacione> Notificaciones { get; set; } = new List<Notificacione>();
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }
