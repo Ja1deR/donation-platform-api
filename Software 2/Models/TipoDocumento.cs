@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Software_2.Models;
+﻿namespace Software_2.Models;
 
 public partial class TipoDocumento
 {

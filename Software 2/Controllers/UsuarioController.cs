@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Newtonsoft.Json;
 using Software_2.Models;
 using Software_2.Services;
-using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -176,6 +173,15 @@ namespace Software_2.Controllers
         {
             try
             {
+                // Validar que el usuario esté autenticado
+                var nameIdentifier = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(nameIdentifier))
+                {
+                    return Unauthorized(new { Error = "Usuario no autenticado." });
+                }
+
+                var currentUserId = int.Parse(nameIdentifier);
+
                 // Mapear el DTO a la entidad Usuario
                 var usuario = new Usuario
                 {
@@ -190,8 +196,11 @@ namespace Software_2.Controllers
                     Activo = usuarioDTO.Activo
                 };
 
-                _usuarioService.RegistrarUsuario(usuario);
-                return CreatedAtAction(nameof(ObtenerUsuario), new { id = usuario.IdUsuario }, "Usuario registrado.");
+                _usuarioService.RegistrarUsuario(usuario, currentUserId);
+
+                return CreatedAtAction(nameof(ObtenerUsuario),
+                    new { id = usuario.IdUsuario },
+                    new { Mensaje = "Usuario registrado." });
             }
             catch (Exception ex)
             {
@@ -201,7 +210,6 @@ namespace Software_2.Controllers
                     Detalle = ex.Message
                 });
             }
-           
         }
 
         [HttpGet("{id}/ObtenerUno")]
@@ -227,33 +235,50 @@ namespace Software_2.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario logueado
+
                 var usuarioExistente = _usuarioService.ObtenerUsuario(id);
                 if (usuarioExistente == null)
                     return NotFound(new { Error = $"Usuario con ID {id} no encontrado" });
 
                 // Mapeo condicional
-                if (usuarioDTO.IdRol.HasValue) usuarioExistente.IdRol = usuarioDTO.IdRol.Value;
-                if (usuarioDTO.IdTipoDocumento.HasValue) usuarioExistente.IdTipoDocumento = usuarioDTO.IdTipoDocumento.Value;
-                if (!string.IsNullOrWhiteSpace(usuarioDTO.NumeroDocumento)) usuarioExistente.NumeroDocumento = usuarioDTO.NumeroDocumento;
-                if (!string.IsNullOrWhiteSpace(usuarioDTO.NombreUsuario)) usuarioExistente.NombreUsuario = usuarioDTO.NombreUsuario;
-                if (!string.IsNullOrWhiteSpace(usuarioDTO.ApellidoUsuario)) usuarioExistente.ApellidoUsuario = usuarioDTO.ApellidoUsuario;
-                if (!string.IsNullOrWhiteSpace(usuarioDTO.TelUsuario)) usuarioExistente.TelUsuario = usuarioDTO.TelUsuario;
-                if (!string.IsNullOrWhiteSpace(usuarioDTO.CorreoUsuario)) usuarioExistente.CorreoUsuario = usuarioDTO.CorreoUsuario;
+                if (usuarioDTO.IdRol.HasValue)
+                    usuarioExistente.IdRol = usuarioDTO.IdRol.Value;
+
+                if (usuarioDTO.IdTipoDocumento.HasValue)
+                    usuarioExistente.IdTipoDocumento = usuarioDTO.IdTipoDocumento.Value;
+
+                if (!string.IsNullOrWhiteSpace(usuarioDTO.NumeroDocumento))
+                    usuarioExistente.NumeroDocumento = usuarioDTO.NumeroDocumento;
+
+                if (!string.IsNullOrWhiteSpace(usuarioDTO.NombreUsuario))
+                    usuarioExistente.NombreUsuario = usuarioDTO.NombreUsuario;
+
+                if (!string.IsNullOrWhiteSpace(usuarioDTO.ApellidoUsuario))
+                    usuarioExistente.ApellidoUsuario = usuarioDTO.ApellidoUsuario;
+
+                if (!string.IsNullOrWhiteSpace(usuarioDTO.TelUsuario))
+                    usuarioExistente.TelUsuario = usuarioDTO.TelUsuario;
+
+                if (!string.IsNullOrWhiteSpace(usuarioDTO.CorreoUsuario))
+                    usuarioExistente.CorreoUsuario = usuarioDTO.CorreoUsuario;
+
                 if (!string.IsNullOrWhiteSpace(usuarioDTO.ContraseñaUsuario))
                     usuarioExistente.ContraseñaUsuario = ContraseñaHasher.Encrypt(usuarioDTO.ContraseñaUsuario);
-                if (usuarioDTO.Activo.HasValue) usuarioExistente.Activo = usuarioDTO.Activo.Value;
 
-                // Validación mejorada
+                if (usuarioDTO.Activo.HasValue)
+                    usuarioExistente.Activo = usuarioDTO.Activo.Value;
+
                 TryValidateModel(usuarioExistente);
 
-                // Remover errores de propiedades de navegación
+              
                 ModelState.Remove("IdRolNavigation");
                 ModelState.Remove("IdTipoDocumentoNavigation");
 
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                _usuarioService.ModificarUsuario(id, usuarioExistente);
+                _usuarioService.ModificarUsuario(id, usuarioExistente, currentUserId); // Pasar currentUserId
 
                 return Ok(new
                 {
@@ -277,19 +302,29 @@ namespace Software_2.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario logueado
+
                 var usuario = _usuarioService.ObtenerUsuario(id);
                 if (usuario == null)
                     return NotFound("Usuario no encontrado.");
 
                 // Eliminación lógica
                 usuario.Activo = false;
-                _usuarioService.ModificarUsuario(id, usuario);
+                _usuarioService.ModificarUsuario(id, usuario, currentUserId); // Pasar currentUserId
 
-                return Ok("Usuario desactivado exitosamente.");
+                return Ok(new
+                {
+                    Mensaje = "Usuario desactivado exitosamente",
+                    Id = id
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error interno: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    Error = "Error al desactivar usuario",
+                    Detalle = ex.Message
+                });
             }
         }
 
@@ -298,18 +333,47 @@ namespace Software_2.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario logueado
+
                 var usuario = _usuarioService.ObtenerUsuarioInactivo(id);
-                if (usuario == null) return NotFound("Usuario no encontrado");
+                if (usuario == null)
+                    return NotFound("Usuario no encontrado");
 
                 usuario.Activo = true;
-                _usuarioService.ModificarUsuario(id, usuario);
+                _usuarioService.ModificarUsuario(id, usuario, currentUserId); // Pasar currentUserId
 
-                return Ok("Usuario reactivado correctamente");
+                return Ok(new
+                {
+                    Mensaje = "Usuario reactivado correctamente",
+                    Id = id
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    Error = "Error al reactivar usuario",
+                    Detalle = ex.Message
+                });
             }
+        }
+
+
+        [HttpPost("Logout")]
+        [Authorize] // Requiere que el usuario esté autenticado
+        public async Task<IActionResult> Logout()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Eliminar todos los refresh tokens asociados al usuario
+            var tokens = await _context.RefreshTokens
+                .Where(rt => rt.IdUsuario == userId)
+                .ToListAsync();
+
+            _context.RefreshTokens.RemoveRange(tokens);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Mensaje = "Logout exitoso" });
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models; // Añadir este using
 using Software_2.Data;
 using Software_2.Repositories;
 using Software_2.Services;
@@ -11,22 +12,50 @@ var builder = WebApplication.CreateBuilder(args);
 // Configurar servicios
 builder.Services.AddControllers();
 
-
+// Configurar DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("cadena")));
 
-
+// Configurar repositorios y servicios
 var connectionString = builder.Configuration.GetConnectionString("cadena");
-
 builder.Services.AddScoped<UsuariosRepository>(provider => new UsuariosRepository(connectionString));
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<FundacionRepository>(provider => new FundacionRepository(connectionString));
 builder.Services.AddScoped<FundacionService>();
 
-// Configurar Swagger
+// Configurar Swagger con JWT
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Donaciones API", Version = "v1" });
 
+    // Configuración para usar JWT en Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header usando el esquema Bearer. Ejemplo: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+// Configurar JWT
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
 builder.Services.AddAuthentication(options =>
@@ -52,16 +81,21 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configurar el pipeline HTTP
+// Configurar pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Donaciones API v1");
+    });
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+// Importante: Authentication debe ir antes de Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

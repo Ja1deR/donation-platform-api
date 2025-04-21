@@ -1,8 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
 using Software_2.Models;
-using System;
-using System.Text.Json;
-using System.Collections.Generic;
 using System.Data;
 
 namespace Software_2.Repositories
@@ -17,7 +14,7 @@ namespace Software_2.Repositories
         }
 
         // RegistrarUsuario (SP: InsertUser)
-        public void RegistrarUsuario(Usuario usuario)
+        public void RegistrarUsuario(Usuario usuario, int currentUserId)
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -25,7 +22,7 @@ namespace Software_2.Repositories
                 SqlCommand command = new SqlCommand("InsertUser", connection);
                 command.CommandType = CommandType.StoredProcedure;
 
-                // Ajuste de nombres de propiedades
+                // Parámetros del usuario
                 command.Parameters.AddWithValue("@ID_rol", usuario.IdRol);
                 command.Parameters.AddWithValue("@ID_tipo_documento", usuario.IdTipoDocumento);
                 command.Parameters.AddWithValue("@Numero_documento", usuario.NumeroDocumento);
@@ -35,6 +32,9 @@ namespace Software_2.Repositories
                 command.Parameters.AddWithValue("@Correo_usuario", usuario.CorreoUsuario);
                 command.Parameters.AddWithValue("@Contraseña_usuario", usuario.ContraseñaUsuario);
                 command.Parameters.AddWithValue("@Activo", usuario.Activo);
+
+                // Nuevo parámetro para auditoría
+                command.Parameters.AddWithValue("@CurrentUserID", currentUserId);
 
                 // Obtener ID 
                 usuario.IdUsuario = Convert.ToInt32(command.ExecuteScalar());
@@ -110,17 +110,15 @@ namespace Software_2.Repositories
         }
 
         // ModificarUsuario (SP: UpdateUser)
-        public void ModificarUsuario(int id, Usuario usuario)
+        public void ModificarUsuario(int id, Usuario usuario, int currentUserId)
         {
-            using (SqlConnection connection = new SqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                SqlCommand command = new SqlCommand("UpdateUser", connection);
-                command.CommandType = CommandType.StoredProcedure;
-
-                // Log parameters for debugging
-                Console.WriteLine($"Actualizando usuario ID: {id}");
-                Console.WriteLine($"Nuevos valores: {System.Text.Json.JsonSerializer.Serialize(usuario)}");
+                var command = new SqlCommand("UpdateUser", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
                 command.Parameters.AddWithValue("@ID_usuario", id);
                 command.Parameters.AddWithValue("@ID_rol", usuario.IdRol);
@@ -130,13 +128,11 @@ namespace Software_2.Repositories
                 command.Parameters.AddWithValue("@Apellido_usuario", usuario.ApellidoUsuario);
                 command.Parameters.AddWithValue("@Tel_usuario", usuario.TelUsuario ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Correo_usuario", usuario.CorreoUsuario);
-                command.Parameters.AddWithValue("@Contraseña_usuario", usuario.ContraseñaUsuario); // Ya viene encriptada
+                command.Parameters.AddWithValue("@Contraseña_usuario", usuario.ContraseñaUsuario);
                 command.Parameters.AddWithValue("@Activo", usuario.Activo);
+                command.Parameters.AddWithValue("@CurrentUserID", currentUserId); 
 
-                int rowsAffected = command.ExecuteNonQuery();
-
-                if (rowsAffected == 0)
-                    throw new Exception("Ningún registro fue actualizado");
+                command.ExecuteNonQuery();
             }
         }
 

@@ -13,7 +13,7 @@ namespace Software_2.Repositories
             _connectionString = connectionString;
         }
 
-        public void RegistrarFundacion(Fundación fundacion)
+        public void RegistrarFundacion(Fundación fundacion, int currentUserId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -31,6 +31,7 @@ namespace Software_2.Repositories
                 command.Parameters.AddWithValue("@Descripción", fundacion.Descripción ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Sitio_web", fundacion.SitioWeb ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Activa", fundacion.Activa);
+                command.Parameters.AddWithValue("@CurrentUserID", currentUserId);
 
                 fundacion.IdFundacion = Convert.ToInt32(command.ExecuteScalar());
             }
@@ -76,7 +77,7 @@ namespace Software_2.Repositories
             return fundaciones;
         }
 
-        public void ModificarFundacion(int id, Fundación fundacion)
+        public void ModificarFundacion(int id, Fundación fundacion, int currentUserId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -94,6 +95,7 @@ namespace Software_2.Repositories
                 command.Parameters.AddWithValue("@Descripción", fundacion.Descripción ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Sitio_web", fundacion.SitioWeb ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Activa", fundacion.Activa);
+                command.Parameters.AddWithValue("@CurrentUserID", currentUserId);
 
                 command.ExecuteNonQuery();
             }
