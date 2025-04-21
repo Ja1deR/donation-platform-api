@@ -1,6 +1,5 @@
 ﻿using Software_2.Repositories;
 using Software_2.Models;
-using System.Collections.Generic;
 
 namespace Software_2.Services
 {
@@ -13,10 +12,10 @@ namespace Software_2.Services
             _fundacionRepository = fundacionRepository;
         }
 
-        public void RegistrarFundacion(Fundación fundacion)
+        public void RegistrarFundacion(Fundación fundacion, int currentUserId)
         {
-            fundacion.FechaRegistro = DateTime.Now; 
-            _fundacionRepository.RegistrarFundacion(fundacion);
+            fundacion.FechaRegistro = DateTime.Now;
+            _fundacionRepository.RegistrarFundacion(fundacion, currentUserId);
         }
 
         public Fundación ObtenerFundacion(int id)
@@ -29,18 +28,18 @@ namespace Software_2.Services
             return _fundacionRepository.ListarFundaciones();
         }
 
-        public void ModificarFundacion(int id, Fundación fundacion)
+        public void ModificarFundacion(int id, Fundación fundacion, int currentUserId)
         {
-            _fundacionRepository.ModificarFundacion(id, fundacion);
+            _fundacionRepository.ModificarFundacion(id, fundacion, currentUserId);
         }
 
-        public void EliminarFundacion(int id)
+        public void EliminarFundacion(int id, int currentUserId) // Agrega el parámetro
         {
             var fundacion = _fundacionRepository.ObtenerFundacion(id);
             if (fundacion != null)
             {
                 fundacion.Activa = false;
-                _fundacionRepository.ModificarFundacion(id, fundacion);
+                _fundacionRepository.ModificarFundacion(id, fundacion, currentUserId); // Pasa currentUserId
             }
         }
     }

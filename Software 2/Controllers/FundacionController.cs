@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Software_2.Models;
 using Software_2.Services;
-using System;
 
 namespace Software_2.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class FundacionController : ControllerBase
     {
         private readonly FundacionService _fundacionService;
@@ -23,9 +23,11 @@ namespace Software_2.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario autenticado
+
                 var fundacion = new Fundación
                 {
-                    IdUsuario = fundacionDTO.IdUsuario,
+                    IdUsuario = currentUserId, // Usar el ID del usuario logueado
                     NombreLegal = fundacionDTO.NombreLegal,
                     Nif = fundacionDTO.Nif,
                     Dirección = fundacionDTO.Direccion,
@@ -36,7 +38,7 @@ namespace Software_2.Controllers
                     FechaRegistro = DateTime.Now
                 };
 
-                _fundacionService.RegistrarFundacion(fundacion);
+                _fundacionService.RegistrarFundacion(fundacion, currentUserId);
                 return CreatedAtAction(nameof(ObtenerFundacion),
                     new { id = fundacion.IdFundacion },
                     new { Mensaje = "Fundación creada" });
@@ -78,6 +80,8 @@ namespace Software_2.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario autenticado
+
                 var fundacionExistente = _fundacionService.ObtenerFundacion(id);
                 if (fundacionExistente == null)
                     return NotFound(new { Error = $"Fundación con ID {id} no encontrada" });
@@ -104,7 +108,7 @@ namespace Software_2.Controllers
                 if (fundacionDTO.Activa.HasValue)
                     fundacionExistente.Activa = fundacionDTO.Activa.Value;
 
-                _fundacionService.ModificarFundacion(id, fundacionExistente);
+                _fundacionService.ModificarFundacion(id, fundacionExistente, currentUserId); // Pasar currentUserId
 
                 return Ok(new
                 {
@@ -128,12 +132,14 @@ namespace Software_2.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario autenticado
+
                 var fundacion = _fundacionService.ObtenerFundacion(id);
                 if (fundacion == null)
                     return NotFound("Fundación no encontrada");
 
                 fundacion.Activa = false;
-                _fundacionService.ModificarFundacion(id, fundacion);
+                _fundacionService.ModificarFundacion(id, fundacion, currentUserId); // Pasar currentUserId
 
                 return Ok(new
                 {
@@ -156,12 +162,14 @@ namespace Software_2.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario autenticado
+
                 var fundacion = _fundacionService.ObtenerFundacion(id);
                 if (fundacion == null)
                     return NotFound("Fundación no encontrada");
 
                 fundacion.Activa = true;
-                _fundacionService.ModificarFundacion(id, fundacion);
+                _fundacionService.ModificarFundacion(id, fundacion, currentUserId); // Pasar currentUserId
 
                 return Ok(new
                 {

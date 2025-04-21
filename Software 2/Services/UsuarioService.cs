@@ -1,7 +1,5 @@
-﻿
-using Software_2.Repositories;
+﻿using Software_2.Repositories;
 using Software_2.Models;
-using System.Collections.Generic;
 
 namespace Software_2.Services
 {
@@ -15,9 +13,9 @@ namespace Software_2.Services
             _usuariosRepository = usuariosRepository;
         }
 
-        public void RegistrarUsuario(Usuario usuario)
+        public void RegistrarUsuario(Usuario usuario, int currentUserId)
         {
-            _usuariosRepository.RegistrarUsuario(usuario);
+            _usuariosRepository.RegistrarUsuario(usuario, currentUserId);
         }
 
         public Usuario ObtenerUsuario(int id)
@@ -30,9 +28,9 @@ namespace Software_2.Services
             return _usuariosRepository.ListarUsuarios();
         }
 
-        public void ModificarUsuario(int id, Usuario usuario)
+        public void ModificarUsuario(int id, Usuario usuario, int currentUserId)
         {
-            _usuariosRepository.ModificarUsuario(id, usuario);
+            _usuariosRepository.ModificarUsuario(id, usuario, currentUserId);
         }
 
         public void EliminarUsuario(int id)
@@ -42,6 +40,10 @@ namespace Software_2.Services
         public Usuario ObtenerUsuarioInactivo(int id)
         {
             return _usuariosRepository.ObtenerUsuarioIncluidoInactivo(id);
+        }
+        public Usuario ObtenerUsuarioPorCorreo(string correo)
+        {
+            return _usuariosRepository.ObtenerUsuarioPorCorreo(correo);
         }
     }
 }
