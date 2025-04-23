@@ -2,8 +2,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models; // Añadir este using
+using Microsoft.OpenApi.Models; 
 using Software_2.Data;
+using Software_2.Helpers;
 using Software_2.Repositories;
 using Software_2.Services;
 
@@ -22,7 +23,8 @@ builder.Services.AddScoped<UsuariosRepository>(provider => new UsuariosRepositor
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<FundacionRepository>(provider => new FundacionRepository(connectionString));
 builder.Services.AddScoped<FundacionService>();
-
+builder.Services.AddScoped<EmailManager>();
+builder.Services.AddScoped<EmailTemplateService>();
 // Configurar Swagger con JWT
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -94,8 +96,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
-// Importante: Authentication debe ir antes de Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

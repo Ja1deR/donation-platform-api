@@ -23,11 +23,11 @@ namespace Software_2.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario autenticado
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); 
 
                 var fundacion = new Fundación
                 {
-                    IdUsuario = currentUserId, // Usar el ID del usuario logueado
+                    IdUsuario = currentUserId, 
                     NombreLegal = fundacionDTO.NombreLegal,
                     Nif = fundacionDTO.Nif,
                     Dirección = fundacionDTO.Direccion,
@@ -80,7 +80,7 @@ namespace Software_2.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario autenticado
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); 
 
                 var fundacionExistente = _fundacionService.ObtenerFundacion(id);
                 if (fundacionExistente == null)
@@ -108,7 +108,7 @@ namespace Software_2.Controllers
                 if (fundacionDTO.Activa.HasValue)
                     fundacionExistente.Activa = fundacionDTO.Activa.Value;
 
-                _fundacionService.ModificarFundacion(id, fundacionExistente, currentUserId); // Pasar currentUserId
+                _fundacionService.ModificarFundacion(id, fundacionExistente, currentUserId); 
 
                 return Ok(new
                 {
@@ -132,14 +132,14 @@ namespace Software_2.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario autenticado
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); 
 
                 var fundacion = _fundacionService.ObtenerFundacion(id);
                 if (fundacion == null)
                     return NotFound("Fundación no encontrada");
 
                 fundacion.Activa = false;
-                _fundacionService.ModificarFundacion(id, fundacion, currentUserId); // Pasar currentUserId
+                _fundacionService.ModificarFundacion(id, fundacion, currentUserId); 
 
                 return Ok(new
                 {
@@ -162,14 +162,14 @@ namespace Software_2.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); // Obtener ID del usuario autenticado
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); 
 
                 var fundacion = _fundacionService.ObtenerFundacion(id);
                 if (fundacion == null)
                     return NotFound("Fundación no encontrada");
 
                 fundacion.Activa = true;
-                _fundacionService.ModificarFundacion(id, fundacion, currentUserId); // Pasar currentUserId
+                _fundacionService.ModificarFundacion(id, fundacion, currentUserId); 
 
                 return Ok(new
                 {

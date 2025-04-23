@@ -1,16 +1,23 @@
 ﻿using Software_2.Repositories;
 using Software_2.Models;
+using Software_2.Helpers;
 
 namespace Software_2.Services
 {
     public class UsuarioService
     {
         private readonly UsuariosRepository _usuariosRepository;
+        private readonly EmailTemplateService _emailTemplateService;
+        private readonly EmailManager _emailManager;
 
-
-        public UsuarioService(UsuariosRepository usuariosRepository)
+        public UsuarioService(
+            UsuariosRepository usuariosRepository,
+            EmailTemplateService emailTemplateService,
+            EmailManager emailManager)
         {
             _usuariosRepository = usuariosRepository;
+            _emailTemplateService = emailTemplateService;
+            _emailManager = emailManager;
         }
 
         public void RegistrarUsuario(Usuario usuario, int currentUserId)
