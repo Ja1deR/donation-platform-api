@@ -101,6 +101,23 @@ namespace Software_2.Repositories
             }
         }
 
+        public Fundación ObtenerFundacionPorUsuario(int idUsuario)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("GetFundacionPorUsuario", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                command.Parameters.AddWithValue("@ID_usuario", idUsuario);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    return reader.Read() ? MapearFundacion(reader) : null;
+                }
+            }
+        }
         private Fundación MapearFundacion(SqlDataReader reader)
         {
             return new Fundación

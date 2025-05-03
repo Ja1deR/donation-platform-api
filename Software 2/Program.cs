@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models; 
+using Microsoft.OpenApi.Models;
 using Software_2.Data;
 using Software_2.Helpers;
 using Software_2.Repositories;
@@ -17,21 +17,28 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("cadena")));
 
-// Configurar repositorios y servicios
+// Obtener cadena de conexión
 var connectionString = builder.Configuration.GetConnectionString("cadena");
+
+// Configurar repositorios
 builder.Services.AddScoped<UsuariosRepository>(provider => new UsuariosRepository(connectionString));
-builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<FundacionRepository>(provider => new FundacionRepository(connectionString));
+builder.Services.AddScoped<PublicacionRepository>(provider => new PublicacionRepository(connectionString));
+
+// Configurar servicios
+builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<FundacionService>();
+builder.Services.AddScoped<PublicacionService>();
 builder.Services.AddScoped<EmailManager>();
 builder.Services.AddScoped<EmailTemplateService>();
-// Configurar Swagger con JWT
+
+// Configurar Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Donaciones API", Version = "v1" });
 
-    // Configuración para usar JWT en Swagger
+    // Configuración JWT en Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header usando el esquema Bearer. Ejemplo: \"Bearer {token}\"",
@@ -52,7 +59,7 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
