@@ -6,10 +6,10 @@ public class ContraseñaHasher
 
 {
 
-    private static byte[] key = Encoding.UTF8.GetBytes("e10adc3949ba59abbe56e057f20f883e"); 
+    private static byte[] key = Encoding.UTF8.GetBytes("e10adc3949ba59abbe56e057f20f883e");
 
     private static byte[] iv = Encoding.UTF8.GetBytes("ABCDEFGH12345678").Take(16).ToArray();
-    
+
 
     public static string GetMD5(string str)
 

@@ -156,7 +156,7 @@ namespace Software_2.Controllers
                 if (refreshToken == null || refreshToken.IsExpired)
                     return Unauthorized(new { Error = "Refresh token inválido o expirado" });
 
-                
+
                 var accessToken = GenerateJwtToken(refreshToken.Usuario);
 
                 _context.RefreshTokens.Remove(refreshToken);
@@ -183,12 +183,12 @@ namespace Software_2.Controllers
         }
 
         [HttpPost("/CrearUsuario")]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         public IActionResult RegistrarUsuario([FromBody] UsuarioDTO usuarioDTO)
         {
             try
             {
-                int systemUserId = 0; 
+                int systemUserId = 0;
 
                 var usuario = new Usuario
                 {
@@ -203,7 +203,7 @@ namespace Software_2.Controllers
                     Activo = usuarioDTO.Activo
                 };
 
-                _usuarioService.RegistrarUsuario(usuario, systemUserId); 
+                _usuarioService.RegistrarUsuario(usuario, systemUserId);
 
                 return CreatedAtAction(nameof(ObtenerUsuario),
                     new { id = usuario.IdUsuario },
@@ -231,7 +231,7 @@ namespace Software_2.Controllers
         [Authorize]
         public IActionResult ListarUsuarios()
         {
-            List<Usuario> usuarios = _usuarioService.ListarUsuarios(); 
+            List<Usuario> usuarios = _usuarioService.ListarUsuarios();
             return Ok(usuarios);
         }
 
@@ -241,13 +241,13 @@ namespace Software_2.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); 
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
                 var usuarioExistente = _usuarioService.ObtenerUsuario(id);
                 if (usuarioExistente == null)
                     return NotFound(new { Error = $"Usuario con ID {id} no encontrado" });
 
-                
+
                 if (usuarioDTO.IdRol.HasValue)
                     usuarioExistente.IdRol = usuarioDTO.IdRol.Value;
 
@@ -277,14 +277,14 @@ namespace Software_2.Controllers
 
                 TryValidateModel(usuarioExistente);
 
-              
+
                 ModelState.Remove("IdRolNavigation");
                 ModelState.Remove("IdTipoDocumentoNavigation");
 
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                _usuarioService.ModificarUsuario(id, usuarioExistente, currentUserId); 
+                _usuarioService.ModificarUsuario(id, usuarioExistente, currentUserId);
 
                 return Ok(new
                 {
@@ -309,13 +309,13 @@ namespace Software_2.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); 
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
                 var usuario = _usuarioService.ObtenerUsuario(id);
                 if (usuario == null)
                     return NotFound("Usuario no encontrado.");
 
-                
+
                 usuario.Activo = false;
                 _usuarioService.ModificarUsuario(id, usuario, currentUserId);
 
@@ -341,14 +341,14 @@ namespace Software_2.Controllers
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value); 
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
                 var usuario = _usuarioService.ObtenerUsuarioInactivo(id);
                 if (usuario == null)
                     return NotFound("Usuario no encontrado");
 
                 usuario.Activo = true;
-                _usuarioService.ModificarUsuario(id, usuario, currentUserId); 
+                _usuarioService.ModificarUsuario(id, usuario, currentUserId);
 
                 return Ok(new
                 {
@@ -368,7 +368,7 @@ namespace Software_2.Controllers
 
 
         [HttpPost("Logout")]
-        [Authorize] 
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

@@ -42,5 +42,9 @@ namespace Software_2.Services
                 _fundacionRepository.ModificarFundacion(id, fundacion, currentUserId); // Pasa currentUserId
             }
         }
+        public Fundación ObtenerFundacionPorUsuario(int idUsuario)
+        {
+            return _fundacionRepository.ObtenerFundacionPorUsuario(idUsuario);
+        }
     }
 }
