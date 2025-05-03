@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Software_2.Models;
 
 namespace Software_2.Data;
@@ -46,6 +44,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -56,6 +56,27 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Token)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            entity.Property(e => e.Expires)
+                .HasColumnType("datetime");
+
+            entity.Property(e => e.Created)
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne(rt => rt.Usuario)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
         modelBuilder.Entity<Auditorium>(entity =>
         {
             entity.HasKey(e => e.IdAuditoria).HasName("PK__Auditori__F6FFFB8CDB49D4A3");
@@ -389,6 +410,8 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.IdUsuario).HasName("PK__Usuarios__DF3D4252DE2473BB");
 
+            entity.ToTable("Usuarios");
+
             entity.Property(e => e.IdUsuario).HasColumnName("ID_usuario");
             entity.Property(e => e.Activo).HasDefaultValue(true);
             entity.Property(e => e.ApellidoUsuario)
@@ -425,15 +448,20 @@ public partial class AppDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("Ultimo_acceso");
 
-            entity.HasOne(d => d.IdRolNavigation).WithMany(p => p.Usuarios)
+            entity.HasOne(d => d.IdRolNavigation)
+                .WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdRol)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientNoAction)
                 .HasConstraintName("FK_Usuarios_Roles");
 
-            entity.HasOne(d => d.IdTipoDocumentoNavigation).WithMany(p => p.Usuarios)
+            entity.HasOne(d => d.IdTipoDocumentoNavigation)
+                .WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.IdTipoDocumento)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.ClientNoAction)
                 .HasConstraintName("FK_Usuarios_Tipo_Documento");
+
+            entity.Navigation(e => e.IdRolNavigation).AutoInclude(false);
+            entity.Navigation(e => e.IdTipoDocumentoNavigation).AutoInclude(false);
         });
 
         OnModelCreatingPartial(modelBuilder);
