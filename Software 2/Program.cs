@@ -24,6 +24,7 @@ var connectionString = builder.Configuration.GetConnectionString("cadena");
 builder.Services.AddScoped<UsuariosRepository>(provider => new UsuariosRepository(connectionString));
 builder.Services.AddScoped<FundacionRepository>(provider => new FundacionRepository(connectionString));
 builder.Services.AddScoped<PublicacionRepository>(provider => new PublicacionRepository(connectionString));
+builder.Services.AddScoped<DonacionRepository>(provider => new DonacionRepository(connectionString));
 
 // Configurar servicios
 builder.Services.AddScoped<UsuarioService>();
@@ -31,6 +32,7 @@ builder.Services.AddScoped<FundacionService>();
 builder.Services.AddScoped<PublicacionService>();
 builder.Services.AddScoped<EmailManager>();
 builder.Services.AddScoped<EmailTemplateService>();
+builder.Services.AddScoped<DonacionService>();
 
 // Configurar Swagger
 builder.Services.AddEndpointsApiExplorer();
