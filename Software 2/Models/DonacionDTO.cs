@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Software_2.Models
 {
@@ -12,6 +13,7 @@ namespace Software_2.Models
         public int Cantidad { get; set; }
 
         [StringLength(500, ErrorMessage = "Máximo 500 caracteres")]
+        [JsonPropertyName("descripcionDonacion")] // 🔄 Mapea al JSON sin tilde
         public string? DescripcionDonacion { get; set; }
 
         [StringLength(255, ErrorMessage = "Máximo 255 caracteres")]

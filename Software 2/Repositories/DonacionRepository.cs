@@ -76,5 +76,20 @@ namespace Software_2.Repositories
             }
             return donaciones;
         }
+        public void ActualizarEstadoDonacion(int idDonacion, int idEstado, int currentUserId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("UpdateEstadoDonacion", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                command.Parameters.AddWithValue("@ID_donacion", idDonacion);
+                command.Parameters.AddWithValue("@ID_estado", idEstado);
+                command.Parameters.AddWithValue("@CurrentUserID", currentUserId);
+                command.ExecuteNonQuery();
+            }
+        }
     }
 }

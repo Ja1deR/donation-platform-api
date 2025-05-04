@@ -15,6 +15,7 @@ namespace Software_2.Services
         public void CrearDonacion(Donacione donacion, int currentUserId)
         {
             donacion.FechaDonacion = DateTime.Now;
+            donacion.IdEstado = 1; 
             _donacionRepo.CrearDonacion(donacion, currentUserId);
         }
 
@@ -30,6 +31,10 @@ namespace Software_2.Services
                     Estado = d.IdEstadoNavigation.NombreEstado,
                     Publicacion = d.IdPublicacionNavigation.NombrePublicacion
                 }).ToList();
+        }
+        public void ActualizarEstadoDonacion(int idDonacion, int idEstado, int currentUserId)
+        {
+            _donacionRepo.ActualizarEstadoDonacion(idDonacion, idEstado, currentUserId);
         }
     }
 }

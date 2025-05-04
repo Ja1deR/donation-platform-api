@@ -46,5 +46,19 @@ namespace Software_2.Services
         {
             return _fundacionRepository.ObtenerFundacionPorUsuario(idUsuario);
         }
+
+        public List<DonacionResponseDTO> ObtenerDonacionesHistoricas(
+            int idFundacion,
+            int pagina,
+            int tamanoPagina,
+            out int totalRegistros)
+        {
+            return _fundacionRepository.ObtenerDonacionesHistoricas(
+                idFundacion,
+                pagina,
+                tamanoPagina,
+                out totalRegistros
+            );
+        }
     }
 }
