@@ -47,5 +47,10 @@ namespace Software_2.Services
         {
             _donacionRepo.ActualizarEstadoDonacion(idDonacion, idEstado, currentUserId);
         }
+      
+        public int ObtenerTotalDonacionesPorFundacion(int idFundacion)
+        {
+            return _donacionRepo.ObtenerTotalDonacionesPorFundacion(idFundacion);
+        }
     }
 }

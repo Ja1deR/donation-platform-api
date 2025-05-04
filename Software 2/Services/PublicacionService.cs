@@ -52,5 +52,9 @@ namespace Software_2.Services
         {
             return _publicacionRepo.ObtenerProgresoDonacion(idPublicacion);
         }
+        public List<PublicacionConDonacionesDTO> ObtenerPublicacionesActivasConProgreso(int idFundacion)
+        {
+            return _publicacionRepo.ObtenerPublicacionesActivasConProgreso(idFundacion);
+        }
     }
 }

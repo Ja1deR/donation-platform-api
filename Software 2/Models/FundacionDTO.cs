@@ -6,7 +6,7 @@ namespace Software_2.Models
     {
         [Required(ErrorMessage = "El ID de usuario es requerido")]
         [Range(1, int.MaxValue, ErrorMessage = "ID de usuario inválido")]
-        public int IdUsuario { get; set; } // ← Propiedad faltante
+        public int IdUsuario { get; set; } 
 
         [Required(ErrorMessage = "Nombre legal es requerido")]
         [StringLength(200, ErrorMessage = "Máximo 200 caracteres")]
