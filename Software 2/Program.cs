@@ -17,7 +17,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("cadena")));
 
-// Obtener cadena de conexión
+// Obtener cadena de conexiÃ³n
 var connectionString = builder.Configuration.GetConnectionString("cadena");
 
 // Configurar repositorios
@@ -40,7 +40,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Donaciones API", Version = "v1" });
 
-    // Configuración JWT en Swagger
+    // ConfiguraciÃ³n JWT en Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header usando el esquema Bearer. Ejemplo: \"Bearer {token}\"",

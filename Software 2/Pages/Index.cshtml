@@ -1,0 +1,173 @@
+﻿@page
+@model Software_2.Pages.IndexModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Inicio - Plataforma de Donaciones";
+}
+
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="hero-title">Conectando donaciones con comunidades necesitadas</h1>
+                <p class="hero-subtitle">Una plataforma para reducir el desperdicio de alimentos y apoyar a quienes más lo necesitan.</p>
+                <div class="hero-actions">
+                    <a asp-page="/Registro/Donante" class="btn btn-primary btn-lg">
+                        <i class="fas fa-hands-helping me-2"></i>Quiero Donar
+                    </a>
+                    <a asp-page="/Registro/Beneficiario" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-utensils me-2"></i>Necesito Ayuda
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 hero-image">
+                <img src="/images/hero-donaciones.jpg"
+                     alt="Donación de alimentos"
+                     class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 stat-item">
+                <div class="stat-value">1,250+</div>
+                <div class="stat-label">Donaciones realizadas</div>
+            </div>
+            <div class="col-md-4 stat-item">
+                <div class="stat-value">850+</div>
+                <div class="stat-label">Familias beneficiadas</div>
+            </div>
+            <div class="col-md-4 stat-item">
+                <div class="stat-value">45+</div>
+                <div class="stat-label">Organizaciones participantes</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="donations-section">
+    <div class="container">
+        <h2 class="section-title">Donaciones Disponibles</h2>
+        <p class="section-subtitle">Alimentos listos para ser distribuidos</p>
+
+        <div class="row">
+            <!-- Donación 1 -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="donation-card">
+                    <div class="donation-badge available">Disponible</div>
+                    <div class="donation-time"><i class="far fa-clock me-1"></i>Hace 2 horas</div>
+                    <h3 class="donation-title">Arroz, frijoles y aceite</h3>
+                    <div class="donation-location">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Zona norte, disponible hasta mañana
+                    </div>
+                    <div class="donation-details">
+                        <div class="detail-item">
+                            <i class="fas fa-boxes me-2"></i>
+                            <span>25 unidades disponibles</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-store me-2"></i>
+                            <span>Supermercado La Economía</span>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-details">
+                        <i class="fas fa-info-circle me-1"></i> Ver detalles
+                    </a>
+                </div>
+            </div>
+
+            <!-- Donación 2 -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="donation-card">
+                    <div class="donation-badge available">Disponible</div>
+                    <div class="donation-time"><i class="far fa-clock me-1"></i>Hace 5 horas</div>
+                    <h3 class="donation-title">Enlatados varios</h3>
+                    <div class="donation-location">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Zona centro, 50 unidades
+                    </div>
+                    <div class="donation-details">
+                        <div class="detail-item">
+                            <i class="fas fa-boxes me-2"></i>
+                            <span>Variedad de conservas</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-store me-2"></i>
+                            <span>Distribuidora Alimentos S.A.</span>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-details">
+                        <i class="fas fa-info-circle me-1"></i> Ver detalles
+                    </a>
+                </div>
+            </div>
+
+            <!-- Donación 3 -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="donation-card">
+                    <div class="donation-badge low-stock">Poco stock</div>
+                    <div class="donation-time"><i class="far fa-clock me-1"></i>Hace 1 día</div>
+                    <h3 class="donation-title">Frutas y verduras</h3>
+                    <div class="donation-location">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Zona oeste, cosecha del día
+                    </div>
+                    <div class="donation-details">
+                        <div class="detail-item">
+                            <i class="fas fa-boxes me-2"></i>
+                            <span>8 cajas disponibles</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-store me-2"></i>
+                            <span>Granja Orgánica Familiar</span>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-details">
+                        <i class="fas fa-info-circle me-1"></i> Ver detalles
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a asp-page="/Donaciones/Disponibles" class="btn btn-primary btn-view-all">
+                <i class="fas fa-list me-1"></i> Ver todas las donaciones
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">¿Cómo funciona?</h2>
+        <p class="section-subtitle">Simple, rápido y transparente</p>
+
+        <div class="steps-container">
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h3 class="step-title">1. Registra tu donación</h3>
+                <p class="step-description">Describe los alimentos que quieres donar y su disponibilidad.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3 class="step-title">2. Conectamos con beneficiarios</h3>
+                <p class="step-description">Organizaciones verificadas recibirán tu donación.</p>
+            </div>
+            <div class="step">
+                <div class="step-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h3 class="step-title">3. Impacto social</h3>
+                <p class="step-description">Recibe reportes del impacto de tu contribución.</p>
+            </div>
+        </div>
+    </div>
+</section>
