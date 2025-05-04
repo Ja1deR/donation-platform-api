@@ -91,5 +91,41 @@ namespace Software_2.Repositories
                 command.ExecuteNonQuery();
             }
         }
+        
+        public List<DonacionResponseDTO> ObtenerDonacionesParaReporte(
+            int idFundacion,
+            DateTime? fechaInicio,
+            DateTime? fechaFin)
+        {
+            var donaciones = new List<DonacionResponseDTO>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("GetDonacionesParaReporte", connection);
+                command.CommandType = CommandType.StoredProcedure;
+
+                
+                command.Parameters.AddWithValue("@ID_fundacion", idFundacion);
+                command.Parameters.AddWithValue("@Fecha_inicio", fechaInicio ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Fecha_fin", fechaFin ?? (object)DBNull.Value);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        donaciones.Add(new DonacionResponseDTO
+                        {
+                            IdDonacion = reader.GetInt32("ID_donacion"),
+                            NombreDonante = reader.GetString("NombreDonante"),
+                            Cantidad = reader.GetInt32("Cantidad"),
+                            FechaDonacion = reader.GetDateTime("Fecha_donacion"),
+                            Estado = reader.GetString("Nombre_estado"),
+                            Publicacion = reader.GetString("Nombre_publicacion")
+                        });
+                    }
+                }
+            }
+            return donaciones;
+        }
     }
 }

@@ -29,5 +29,21 @@ namespace Software_2.Services
             byte[] imageBytes = File.ReadAllBytes(imagePath);
             return Convert.ToBase64String(imageBytes);
         }
+ 
+        public string ConstruirMensajeDonacion(
+            string nombreUsuario,
+            int cantidad,
+            string nombreFundacion,
+            string nombrePublicacion)
+        {
+            return $@"
+        <h1 style='color: #2c3e50;'>¡Gracias por tu generosidad, {nombreUsuario}!</h1>
+        <p>Has realizado una donación de <strong>{cantidad}</strong> unidades a la fundación <strong>{nombreFundacion}</strong>.</p>
+        <p>Destinado a: <em>{nombrePublicacion}</em></p>
+        <p>Fecha de la donación: {DateTime.Now:dd/MM/yyyy HH:mm}</p>
+        <hr>
+        <p>Este es un comprobante automático, no es necesario responder.</p>
+    ";
+        }
     }
 }

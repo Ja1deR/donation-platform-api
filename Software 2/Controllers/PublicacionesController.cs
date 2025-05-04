@@ -108,5 +108,45 @@ namespace Software_2.Controllers
             }
         }
 
+        [HttpPut("{id}/Desactivar")]
+        public IActionResult DesactivarPublicacion(int id)
+        {
+            try
+            {
+                var publicacion = _publicacionService.ObtenerPublicacion(id);
+                if (publicacion == null)
+                    return NotFound("Publicación no encontrada");
+
+                publicacion.Activa = false;
+                _publicacionService.ActualizarPublicacion(publicacion);
+
+                return Ok(new { Mensaje = "Publicación desactivada" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/Reactivar")]
+        public IActionResult ReactivarPublicacion(int id)
+        {
+            try
+            {
+                var publicacion = _publicacionService.ObtenerPublicacion(id);
+                if (publicacion == null)
+                    return NotFound("Publicación no encontrada");
+
+                publicacion.Activa = true;
+                _publicacionService.ActualizarPublicacion(publicacion);
+
+                return Ok(new { Mensaje = "Publicación reactivada exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
     }
 }
