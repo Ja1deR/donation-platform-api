@@ -29,9 +29,12 @@ namespace Software_2.Services
             return _publicacionRepo.CrearPublicacion(publicacion, currentUserId);
         }
 
-        public List<Publicacione> ListarPublicaciones(int pagina, int tamanoPagina, int? categoriaId)
+        public (List<Publicacione> Publicaciones, int TotalPaginas) ListarPublicaciones(int pagina, int tamanoPagina, int? categoriaId)
         {
-            return _publicacionRepo.ListarPublicaciones(pagina, tamanoPagina, categoriaId);
+            int totalRegistros;
+            var publicaciones = _publicacionRepo.ListarPublicaciones(pagina, tamanoPagina, categoriaId, out totalRegistros);
+            int totalPaginas = (int)Math.Ceiling((double)totalRegistros / tamanoPagina);
+            return (publicaciones, totalPaginas);
         }
         public Publicacione ObtenerPublicacion(int id)
         {
