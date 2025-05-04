@@ -13,17 +13,19 @@ namespace Software_2.Controllers
     {
         private readonly FundacionService _fundacionService;
         private readonly PublicacionService _publicacionService;
-        private readonly DonacionService _donacionService; 
+        private readonly DonacionService _donacionService;
+        private readonly ComentarioService _comentarioService; 
 
-        
         public FundacionController(
             FundacionService fundacionService,
-            PublicacionService publicacionService, 
-            DonacionService donacionService) 
+            PublicacionService publicacionService,
+            DonacionService donacionService,
+            ComentarioService comentarioService) 
         {
             _fundacionService = fundacionService;
-            _publicacionService = publicacionService; 
-            _donacionService = donacionService; 
+            _publicacionService = publicacionService;
+            _donacionService = donacionService;
+            _comentarioService = comentarioService; 
         }
 
         [HttpPost("/CrearFundacion")]
@@ -231,9 +233,9 @@ namespace Software_2.Controllers
                 return StatusCode(500, new { Error = ex.Message });
             }
         }
-  
+
         [HttpGet("{id}/perfil")]
-        [AllowAnonymous] 
+        [AllowAnonymous]
         public IActionResult ObtenerPerfilFundacion(int id)
         {
             try
@@ -250,7 +252,8 @@ namespace Software_2.Controllers
                     SitioWeb = fundacion.SitioWeb,
                     FechaRegistro = fundacion.FechaRegistro,
                     PublicacionesActivas = _publicacionService.ObtenerPublicacionesActivasConProgreso(id),
-                    TotalDonacionesHistoricas = _donacionService.ObtenerTotalDonacionesPorFundacion(id)
+                    TotalDonacionesHistoricas = _donacionService.ObtenerTotalDonacionesPorFundacion(id),
+                    Comentarios = _comentarioService.ObtenerComentariosPorFundacion(id) // 👈 Nueva línea
                 };
 
                 return Ok(perfil);

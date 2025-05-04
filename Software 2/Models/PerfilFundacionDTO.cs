@@ -8,10 +8,11 @@ namespace Software_2.Models
         public string NombreLegal { get; set; }
         public string Descripcion { get; set; }
         public string SitioWeb { get; set; }
+        public DateTime FechaRegistro { get; set; }
         public List<PublicacionConDonacionesDTO> PublicacionesActivas { get; set; }
         public int TotalDonacionesHistoricas { get; set; }
-        public DateTime FechaRegistro { get; set; }
+        public List<ComentarioResponseDTO> Comentarios { get; set; } 
     }
 
-    
+
 }
