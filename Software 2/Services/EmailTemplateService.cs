@@ -45,5 +45,27 @@ namespace Software_2.Services
         <p>Este es un comprobante automático, no es necesario responder.</p>
     ";
         }
+        public string ConstruirMensajeCambioEstado(
+            string nombreDonante,
+            int cantidad,
+            string nombreFundacion,
+            string estadoAnterior,
+            string nuevoEstado)
+        {
+            return $@"
+    <html>
+        <body style='font-family: Arial; padding: 20px;'>
+            <div style='max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 10px; padding: 20px;'>
+                <h2 style='color: #2c3e50;'>¡Hola {nombreDonante}!</h2>
+                <p>El estado de tu donación de <strong>{cantidad} unidades</strong> a <strong>{nombreFundacion}</strong> ha cambiado:</p>
+                <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                    <p style='margin: 0;'><strong>Estado anterior:</strong> {estadoAnterior}</p>
+                    <p style='margin: 0;'><strong>Nuevo estado:</strong> {nuevoEstado}</p>
+                </div>
+                <p style='color: #6c757d;'>Fecha de actualización: {DateTime.Now.ToString("dd/MM/yyyy HH:mm")}</p>
+            </div>
+        </body>
+    </html>";
+        }
     }
 }

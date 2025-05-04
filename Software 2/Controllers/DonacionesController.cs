@@ -2,6 +2,7 @@
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Software_2.Data;
 using Software_2.Helpers;
 using Software_2.Models;
 using Software_2.Services;
@@ -18,7 +19,8 @@ namespace Software_2.Controllers
         private readonly UsuarioService _usuarioService;
         private readonly FundacionService _fundacionService;
         private readonly EmailTemplateService _emailTemplateService; 
-        private readonly EmailManager _emailManager; 
+        private readonly EmailManager _emailManager;
+        private readonly AppDbContext _context;
 
         public DonacionesController(
             DonacionService donacionService,
@@ -26,7 +28,9 @@ namespace Software_2.Controllers
             UsuarioService usuarioService,
             FundacionService fundacionService,
             EmailTemplateService emailTemplateService,
-            EmailManager emailManager) 
+            EmailManager emailManager,
+            AppDbContext context
+            ) 
         {
             _donacionService = donacionService;
             _publicacionService = publicacionService;
@@ -34,6 +38,7 @@ namespace Software_2.Controllers
             _fundacionService = fundacionService;
             _emailTemplateService = emailTemplateService;
             _emailManager = emailManager;
+            _context = context;
         }
 
         [HttpPost]
@@ -116,15 +121,33 @@ namespace Software_2.Controllers
             try
             {
                 var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                // Obtener estado anterior antes de actualizar
+                var estadoAnterior = _context.Donaciones
+                    .Where(d => d.IdDonacion == id)
+                    .Select(d => d.IdEstadoNavigation.NombreEstado)
+                    .FirstOrDefault();
+
                 _donacionService.ActualizarEstadoDonacion(id, dto.IdEstado, currentUserId);
-                return Ok(new { Mensaje = "Estado de la donación actualizado correctamente." });
+
+                return Ok(new
+                {
+                    Mensaje = "Estado actualizado correctamente",
+                    EstadoAnterior = estadoAnterior,
+                    NuevoEstado = _context.Estados.Find(dto.IdEstado)?.NombreEstado
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { Error = ex.Message });
+                return StatusCode(500, new
+                {
+                    Error = "Error al actualizar estado",
+                    Detalle = ex.Message,
+                    InnerException = ex.InnerException?.Message
+                });
             }
         }
-        
+
         [HttpPost("GenerarReporteExcel")]
         [AllowAnonymous]
         public IActionResult GenerarReporteExcel([FromBody] ReporteFiltroDTO filtro)
