@@ -70,5 +70,19 @@ namespace Software_2.Controllers
                 return StatusCode(500, new { Error = ex.Message });
             }
         }
+        [HttpPut("{id}/Estado")]
+        public IActionResult ActualizarEstadoDonacion(int id, [FromBody] ActualizarEstadoDonacionDTO dto)
+        {
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                _donacionService.ActualizarEstadoDonacion(id, dto.IdEstado, currentUserId);
+                return Ok(new { Mensaje = "Estado de la donación actualizado correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
     }
 }
