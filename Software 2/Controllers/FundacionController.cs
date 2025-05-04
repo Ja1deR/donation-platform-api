@@ -12,13 +12,24 @@ namespace Software_2.Controllers
     public class FundacionController : ControllerBase
     {
         private readonly FundacionService _fundacionService;
+        private readonly PublicacionService _publicacionService;
+        private readonly DonacionService _donacionService;
+        private readonly ComentarioService _comentarioService; 
 
-        public FundacionController(FundacionService fundacionService)
+        public FundacionController(
+            FundacionService fundacionService,
+            PublicacionService publicacionService,
+            DonacionService donacionService,
+            ComentarioService comentarioService) 
         {
             _fundacionService = fundacionService;
+            _publicacionService = publicacionService;
+            _donacionService = donacionService;
+            _comentarioService = comentarioService; 
         }
 
         [HttpPost("/CrearFundacion")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult RegistrarFundacion([FromBody] FundacionDTO fundacionDTO)
         {
             try
@@ -50,6 +61,8 @@ namespace Software_2.Controllers
         }
 
         [HttpGet("{id}/ObtenerUno")]
+        [AllowAnonymous]
+
         public IActionResult ObtenerFundacion(int id)
         {
             var fundacion = _fundacionService.ObtenerFundacion(id);
@@ -65,6 +78,7 @@ namespace Software_2.Controllers
         }
 
         [HttpGet("/ObtenerTodas")]
+        [AllowAnonymous]
         public IActionResult ListarFundaciones()
         {
             var fundaciones = _fundacionService.ListarFundaciones();
@@ -76,6 +90,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPut("{id}/Modificar")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult ModificarFundacion(int id, [FromBody] FundacionUpdateDTO fundacionDTO)
         {
             try
@@ -86,7 +101,6 @@ namespace Software_2.Controllers
                 if (fundacionExistente == null)
                     return NotFound(new { Error = $"Fundación con ID {id} no encontrada" });
 
-                // Actualización condicional
                 if (!string.IsNullOrWhiteSpace(fundacionDTO.NombreLegal))
                     fundacionExistente.NombreLegal = fundacionDTO.NombreLegal;
 
@@ -128,6 +142,7 @@ namespace Software_2.Controllers
         }
 
         [HttpDelete("{id}/Eliminar")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult EliminarFundacion(int id)
         {
             try
@@ -158,6 +173,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPatch("{id}/Reactivar")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult ReactivarFundacion(int id)
         {
             try
@@ -186,8 +202,9 @@ namespace Software_2.Controllers
                 });
             }
         }
-        // FundacionController.cs
+      
         [HttpGet("{id}/donaciones")]
+        [AllowAnonymous]
         public IActionResult ObtenerDonacionesPorFundacion(
             int id,
             [FromQuery] int pagina = 1,
@@ -210,6 +227,36 @@ namespace Software_2.Controllers
                     TotalRegistros = totalRegistros,
                     Donaciones = donaciones
                 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpGet("{id}/perfil")]
+        [AllowAnonymous]
+        public IActionResult ObtenerPerfilFundacion(int id)
+        {
+            try
+            {
+                var fundacion = _fundacionService.ObtenerFundacion(id);
+                if (fundacion == null || !fundacion.Activa.GetValueOrDefault())
+                    return NotFound("Fundación no encontrada o inactiva");
+
+                var perfil = new PerfilFundacionDTO
+                {
+                    IdFundacion = fundacion.IdFundacion,
+                    NombreLegal = fundacion.NombreLegal,
+                    Descripcion = fundacion.Descripción ?? "Sin descripción",
+                    SitioWeb = fundacion.SitioWeb,
+                    FechaRegistro = fundacion.FechaRegistro,
+                    PublicacionesActivas = _publicacionService.ObtenerPublicacionesActivasConProgreso(id),
+                    TotalDonacionesHistoricas = _donacionService.ObtenerTotalDonacionesPorFundacion(id),
+                    Comentarios = _comentarioService.ObtenerComentariosPorFundacion(id) // 👈 Nueva línea
+                };
+
+                return Ok(perfil);
             }
             catch (Exception ex)
             {

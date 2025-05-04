@@ -33,13 +33,13 @@ namespace Software_2.Services
             _fundacionRepository.ModificarFundacion(id, fundacion, currentUserId);
         }
 
-        public void EliminarFundacion(int id, int currentUserId) // Agrega el parámetro
+        public void EliminarFundacion(int id, int currentUserId) 
         {
             var fundacion = _fundacionRepository.ObtenerFundacion(id);
             if (fundacion != null)
             {
                 fundacion.Activa = false;
-                _fundacionRepository.ModificarFundacion(id, fundacion, currentUserId); // Pasa currentUserId
+                _fundacionRepository.ModificarFundacion(id, fundacion, currentUserId); 
             }
         }
         public Fundación ObtenerFundacionPorUsuario(int idUsuario)

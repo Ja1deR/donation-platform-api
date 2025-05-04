@@ -23,6 +23,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult CrearPublicacion([FromBody] PublicacionDTO publicacionDTO)
         {
             try
@@ -109,6 +110,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPut("{id}/Desactivar")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult DesactivarPublicacion(int id)
         {
             try
@@ -129,6 +131,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPut("{id}/Reactivar")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult ReactivarPublicacion(int id)
         {
             try

@@ -25,6 +25,7 @@ builder.Services.AddScoped<UsuariosRepository>(provider => new UsuariosRepositor
 builder.Services.AddScoped<FundacionRepository>(provider => new FundacionRepository(connectionString));
 builder.Services.AddScoped<PublicacionRepository>(provider => new PublicacionRepository(connectionString));
 builder.Services.AddScoped<DonacionRepository>(provider => new DonacionRepository(connectionString));
+builder.Services.AddScoped<ComentarioRepository>(provider => new ComentarioRepository(connectionString));
 
 // Configurar servicios
 builder.Services.AddScoped<UsuarioService>();
@@ -33,7 +34,8 @@ builder.Services.AddScoped<PublicacionService>();
 builder.Services.AddScoped<EmailManager>();
 builder.Services.AddScoped<EmailTemplateService>();
 builder.Services.AddScoped<DonacionService>();
-builder.Services.AddScoped<DonacionService>();
+builder.Services.AddScoped<ComentarioService>();
+
 
 // Configurar Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -89,7 +91,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Administrador", policy => policy.RequireRole("Administrador"));
+    options.AddPolicy("Fundacion", policy => policy.RequireRole("Fundacion"));
+    options.AddPolicy("Donante", policy => policy.RequireRole("Donante"));
+});
 
 var app = builder.Build();
 

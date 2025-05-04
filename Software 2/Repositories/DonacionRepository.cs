@@ -127,5 +127,19 @@ namespace Software_2.Repositories
             }
             return donaciones;
         }
+   
+        public int ObtenerTotalDonacionesPorFundacion(int idFundacion)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("GetTotalDonacionesPorFundacion", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                command.Parameters.AddWithValue("@ID_fundacion", idFundacion);
+                return Convert.ToInt32(command.ExecuteScalar());
+            }
+        }
     }
 }
