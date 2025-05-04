@@ -118,7 +118,11 @@ namespace Software_2.Repositories
                 }
             }
         }
-        public List<DonacionResponseDTO> ObtenerDonacionesHistoricas(int idFundacion, int pagina, int tamanoPagina, out int totalRegistros)
+        public List<DonacionResponseDTO> ObtenerDonacionesHistoricas(
+            int idFundacion,
+            int pagina,
+            int tamanoPagina,
+            out int totalRegistros)
         {
             var donaciones = new List<DonacionResponseDTO>();
             totalRegistros = 0;
@@ -136,6 +140,7 @@ namespace Software_2.Repositories
 
                 using (var reader = command.ExecuteReader())
                 {
+                    // Leer primer resultado (donaciones paginadas)
                     while (reader.Read())
                     {
                         donaciones.Add(new DonacionResponseDTO
@@ -149,7 +154,7 @@ namespace Software_2.Repositories
                         });
                     }
 
-                    // Obtener total de registros
+                    // Leer segundo resultado (total de registros)
                     if (reader.NextResult() && reader.Read())
                     {
                         totalRegistros = reader.GetInt32("TotalRegistros");
