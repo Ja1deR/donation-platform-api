@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Software_2.Models;
 using Software_2.Services;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 namespace Software_2.Controllers
 {
@@ -31,14 +29,9 @@ namespace Software_2.Controllers
             {
                 var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-                // Validar que la publicación esté activa y no haya expirado
                 var publicacion = _publicacionService.ObtenerPublicacion(donacionDTO.IdPublicacion);
                 if (publicacion == null || !publicacion.Activa.GetValueOrDefault())
-                    return BadRequest("La publicación no existe o está inactiva");
-
-                if (publicacion.FechaFin.HasValue && publicacion.FechaFin < DateTime.Now)
-                    return BadRequest("La publicación ha expirado");
-
+                    return BadRequest("Publicación no válida");
                 if (!publicacion.IdCategoriaDonacion.HasValue)
                     return BadRequest("La publicación no tiene una categoría válida");
 
@@ -46,22 +39,17 @@ namespace Software_2.Controllers
                 {
                     IdUsuarioDonante = currentUserId,
                     IdFundacion = publicacion.IdFundacion,
+                    IdPublicacion = donacionDTO.IdPublicacion,
                     IdCategoriaDonacion = publicacion.IdCategoriaDonacion.Value,
                     Cantidad = donacionDTO.Cantidad,
-                    DescripciónDonacion = donacionDTO.Descripcion,
-                    FechaDonacion = DateTime.Now,
+                    DescripciónDonacion = donacionDTO.DescripcionDonacion,
                     Ubicacion = donacionDTO.Ubicacion,
-                    IdEstado = 1, // Estado inicial: Pendiente
-                    IdPublicacion = donacionDTO.IdPublicacion
+                    IdEstado = 1 // Estado inicial (Ej: 'Pendiente')
                 };
 
                 _donacionService.CrearDonacion(donacion, currentUserId);
 
-                return Ok(new
-                {
-                    Mensaje = "Donación registrada exitosamente",
-                    Donacion = donacion
-                });
+                return Ok(new { Mensaje = "Donación registrada exitosamente" });
             }
             catch (Exception ex)
             {
@@ -69,42 +57,18 @@ namespace Software_2.Controllers
             }
         }
 
-        [HttpPatch("{id}/Estado")]
-        [Authorize(Roles = "2,3")] // Solo administradores o fundaciones
-        public IActionResult ActualizarEstado(int id, [FromBody] EstadoDTO estadoDTO)
+        [HttpGet("fundacion/{idFundacion}")]
+        public IActionResult ObtenerDonacionesPorFundacion(int idFundacion)
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                _donacionService.ActualizarEstado(id, estadoDTO.IdEstado, currentUserId);
-                return Ok(new { Mensaje = "Estado actualizado correctamente" });
+                var donaciones = _donacionService.ObtenerDonacionesPorFundacion(idFundacion);
+                return Ok(donaciones);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { Error = ex.Message });
             }
         }
-    }
-
-    // DTOs
-    public class DonacionDTO
-    {
-        [Required]
-        public int IdPublicacion { get; set; }
-
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor a 0")]
-        public int Cantidad { get; set; }
-
-        public string? Descripcion { get; set; }
-
-        public string? Ubicacion { get; set; }
-    }
-
-    public class EstadoDTO
-    {
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Estado inválido")]
-        public int IdEstado { get; set; }
     }
 }

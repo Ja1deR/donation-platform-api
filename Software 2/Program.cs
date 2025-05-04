@@ -33,6 +33,7 @@ builder.Services.AddScoped<PublicacionService>();
 builder.Services.AddScoped<EmailManager>();
 builder.Services.AddScoped<EmailTemplateService>();
 builder.Services.AddScoped<DonacionService>();
+builder.Services.AddScoped<DonacionService>();
 
 // Configurar Swagger
 builder.Services.AddEndpointsApiExplorer();

@@ -5,22 +5,31 @@ namespace Software_2.Services
 {
     public class DonacionService
     {
-        private readonly DonacionRepository _donacionRepository;
+        private readonly DonacionRepository _donacionRepo;
 
-        public DonacionService(DonacionRepository donacionRepository)
+        public DonacionService(DonacionRepository donacionRepo)
         {
-            _donacionRepository = donacionRepository;
+            _donacionRepo = donacionRepo;
         }
 
         public void CrearDonacion(Donacione donacion, int currentUserId)
         {
-            _donacionRepository.CrearDonacion(donacion, currentUserId);
+            donacion.FechaDonacion = DateTime.Now;
+            _donacionRepo.CrearDonacion(donacion, currentUserId);
         }
 
-        public void ActualizarEstado(int idDonacion, int idEstado, int currentUserId)
+        public List<DonacionResponseDTO> ObtenerDonacionesPorFundacion(int idFundacion)
         {
-            _donacionRepository.ActualizarEstado(idDonacion, idEstado, currentUserId);
+            return _donacionRepo.ObtenerDonacionesPorFundacion(idFundacion)
+                .Select(d => new DonacionResponseDTO
+                {
+                    IdDonacion = d.IdDonacion,
+                    NombreDonante = d.IdUsuarioDonanteNavigation.NombreUsuario,
+                    Cantidad = d.Cantidad,
+                    FechaDonacion = d.FechaDonacion,
+                    Estado = d.IdEstadoNavigation.NombreEstado,
+                    Publicacion = d.IdPublicacionNavigation.NombrePublicacion
+                }).ToList();
         }
-
     }
 }

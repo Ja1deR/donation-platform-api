@@ -71,11 +71,11 @@ namespace Software_2.Controllers
         {
             try
             {
-                var publicaciones = _publicacionService.ListarPublicaciones(pagina, tamanoPagina, categoriaId);
+                var (publicaciones, totalPaginas) = _publicacionService.ListarPublicaciones(pagina, tamanoPagina, categoriaId);
                 return Ok(new
                 {
                     Pagina = pagina,
-                    TotalPaginas = (int)Math.Ceiling(publicaciones.Count / (double)tamanoPagina),
+                    TotalPaginas = totalPaginas,
                     Publicaciones = publicaciones
                 });
             }

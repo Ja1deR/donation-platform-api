@@ -27,34 +27,54 @@ namespace Software_2.Repositories
                 command.Parameters.AddWithValue("@ID_fundacion", donacion.IdFundacion);
                 command.Parameters.AddWithValue("@ID_categoria_donacion", donacion.IdCategoriaDonacion);
                 command.Parameters.AddWithValue("@Cantidad", donacion.Cantidad);
-                command.Parameters.AddWithValue("@Descripción_donacion", donacion.DescripciónDonacion ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Descripcion_donacion", donacion.DescripciónDonacion ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@Ubicacion", donacion.Ubicacion ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@ID_estado", donacion.IdEstado);
                 command.Parameters.AddWithValue("@ID_publicacion", donacion.IdPublicacion);
                 command.Parameters.AddWithValue("@CurrentUserID", currentUserId);
 
                 command.ExecuteNonQuery();
-
             }
-
         }
 
-        public void ActualizarEstado(int idDonacion, int idEstado, int currentUserId)
+        public List<Donacione> ObtenerDonacionesPorFundacion(int idFundacion)
         {
+            var donaciones = new List<Donacione>();
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                var command = new SqlCommand("UpdateEstadoDonacion", connection)
+                var command = new SqlCommand("GetDonacionesPorFundacion", connection)
                 {
                     CommandType = CommandType.StoredProcedure
                 };
+                command.Parameters.AddWithValue("@ID_fundacion", idFundacion);
 
-                command.Parameters.AddWithValue("@ID_donacion", idDonacion);
-                command.Parameters.AddWithValue("@ID_estado", idEstado);
-                command.Parameters.AddWithValue("@CurrentUserID", currentUserId);
-
-                command.ExecuteNonQuery();
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        donaciones.Add(new Donacione
+                        {
+                            IdDonacion = reader.GetInt32("ID_donacion"),
+                            Cantidad = reader.GetInt32("Cantidad"),
+                            FechaDonacion = reader.GetDateTime("Fecha_donacion"),
+                            IdEstadoNavigation = new Estado
+                            {
+                                NombreEstado = reader.GetString("Nombre_estado")
+                            },
+                            IdUsuarioDonanteNavigation = new Usuario
+                            {
+                                NombreUsuario = reader.GetString("Nombre_usuario")
+                            },
+                            IdPublicacionNavigation = new Publicacione
+                            {
+                                NombrePublicacion = reader.GetString("Nombre_publicacion")
+                            }
+                        });
+                    }
+                }
             }
+            return donaciones;
         }
     }
 }
