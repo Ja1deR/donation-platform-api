@@ -32,6 +32,17 @@ namespace Software_2.Services
                     Publicacion = d.IdPublicacionNavigation.NombrePublicacion
                 }).ToList();
         }
+        public List<DonacionResponseDTO> ObtenerDonacionesParaReporte(
+            int idFundacion,
+            DateTime? fechaInicio,
+            DateTime? fechaFin)
+        {
+            return _donacionRepo.ObtenerDonacionesParaReporte(
+                idFundacion,
+                fechaInicio,
+                fechaFin
+            );
+        }
         public void ActualizarEstadoDonacion(int idDonacion, int idEstado, int currentUserId)
         {
             _donacionRepo.ActualizarEstadoDonacion(idDonacion, idEstado, currentUserId);

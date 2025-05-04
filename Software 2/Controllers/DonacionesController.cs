@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Software_2.Models;
@@ -78,6 +79,56 @@ namespace Software_2.Controllers
                 var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                 _donacionService.ActualizarEstadoDonacion(id, dto.IdEstado, currentUserId);
                 return Ok(new { Mensaje = "Estado de la donación actualizado correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+        // Controllers/DonacionesController.cs
+        [HttpPost("GenerarReporteExcel")]
+        public IActionResult GenerarReporteExcel([FromBody] ReporteFiltroDTO filtro)
+        {
+            try
+            {
+                var donaciones = _donacionService.ObtenerDonacionesParaReporte(
+                    filtro.IdFundacion,
+                    filtro.FechaInicio,
+                    filtro.FechaFin
+                );
+
+                using (var workbook = new XLWorkbook())
+                {
+                    var worksheet = workbook.Worksheets.Add("Donaciones");
+
+                    // Cabeceras
+                    worksheet.Cell(1, 1).Value = "Donante";
+                    worksheet.Cell(1, 2).Value = "Cantidad";
+                    worksheet.Cell(1, 3).Value = "Fecha";
+                    worksheet.Cell(1, 4).Value = "Estado";
+                    worksheet.Cell(1, 5).Value = "Publicación";
+
+                    // Datos
+                    int row = 2;
+                    foreach (var d in donaciones)
+                    {
+                        worksheet.Cell(row, 1).Value = d.NombreDonante;
+                        worksheet.Cell(row, 2).Value = d.Cantidad;
+                        worksheet.Cell(row, 3).Value = d.FechaDonacion.ToString("dd/MM/yyyy");
+                        worksheet.Cell(row, 4).Value = d.Estado;
+                        worksheet.Cell(row, 5).Value = d.Publicacion;
+                        row++;
+                    }
+
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        var content = stream.ToArray();
+                        return File(content,
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            $"ReporteDonaciones_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+                    }
+                }
             }
             catch (Exception ex)
             {
