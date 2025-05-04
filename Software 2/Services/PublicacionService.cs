@@ -41,7 +41,13 @@ namespace Software_2.Services
             return _publicacionRepo.ObtenerPublicacion(id);
         }
 
-        // Opcional: Para progreso de donaciones
+        
+        public void ActualizarPublicacion(Publicacione publicacion)
+        {
+            int systemUserId = 0; 
+            _publicacionRepo.ActualizarPublicacion(publicacion, systemUserId);
+        }
+        
         public decimal? ObtenerProgresoDonacion(int idPublicacion)
         {
             return _publicacionRepo.ObtenerProgresoDonacion(idPublicacion);

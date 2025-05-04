@@ -129,6 +129,28 @@ namespace Software_2.Repositories
                 }
             }
         }
+        public void ActualizarPublicacion(Publicacione publicacion, int currentUserId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("UpdatePublicacion", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                command.Parameters.AddWithValue("@ID_publicacion", publicacion.IdPublicacion);
+                command.Parameters.AddWithValue("@Nombre_publicacion", publicacion.NombrePublicacion);
+                command.Parameters.AddWithValue("@Descripcion", publicacion.Descripción);
+                command.Parameters.AddWithValue("@Fecha_fin", publicacion.FechaFin ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Meta_cantidad", publicacion.MetaCantidad ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@ID_categoria_donacion", publicacion.IdCategoriaDonacion ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Activa", publicacion.Activa);
+                command.Parameters.AddWithValue("@CurrentUserID", currentUserId);
+
+                command.ExecuteNonQuery();
+            }
+        }
 
     }
 }

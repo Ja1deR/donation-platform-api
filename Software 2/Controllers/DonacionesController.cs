@@ -17,16 +17,16 @@ namespace Software_2.Controllers
         private readonly PublicacionService _publicacionService;
         private readonly UsuarioService _usuarioService;
         private readonly FundacionService _fundacionService;
-        private readonly EmailTemplateService _emailTemplateService; // ✅ Nueva dependencia
-        private readonly EmailManager _emailManager; // ✅ Nueva dependencia
+        private readonly EmailTemplateService _emailTemplateService; 
+        private readonly EmailManager _emailManager; 
 
         public DonacionesController(
             DonacionService donacionService,
             PublicacionService publicacionService,
             UsuarioService usuarioService,
             FundacionService fundacionService,
-            EmailTemplateService emailTemplateService, // ✅ Inyectar
-            EmailManager emailManager) // ✅ Inyectar
+            EmailTemplateService emailTemplateService,
+            EmailManager emailManager) 
         {
             _donacionService = donacionService;
             _publicacionService = publicacionService;
