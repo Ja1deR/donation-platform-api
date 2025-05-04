@@ -37,6 +37,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Fundacion, Administrador, Donante")]
         public IActionResult CrearDonacion([FromBody] DonacionDTO donacionDTO)
         {
             try
@@ -95,6 +96,7 @@ namespace Software_2.Controllers
 
 
         [HttpGet("fundacion/{idFundacion}")]
+        [AllowAnonymous]
         public IActionResult ObtenerDonacionesPorFundacion(int idFundacion)
         {
             try
@@ -108,6 +110,7 @@ namespace Software_2.Controllers
             }
         }
         [HttpPut("{id}/Estado")]
+        [Authorize(Roles = "Administrador")]
         public IActionResult ActualizarEstadoDonacion(int id, [FromBody] ActualizarEstadoDonacionDTO dto)
         {
             try
@@ -123,6 +126,7 @@ namespace Software_2.Controllers
         }
         
         [HttpPost("GenerarReporteExcel")]
+        [AllowAnonymous]
         public IActionResult GenerarReporteExcel([FromBody] ReporteFiltroDTO filtro)
         {
             try

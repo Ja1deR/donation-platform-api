@@ -89,7 +89,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Administrador", policy => policy.RequireRole("Administrador"));
+    options.AddPolicy("Fundacion", policy => policy.RequireRole("Fundacion"));
+    options.AddPolicy("Donante", policy => policy.RequireRole("Donante"));
+});
 
 var app = builder.Build();
 

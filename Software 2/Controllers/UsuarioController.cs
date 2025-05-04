@@ -19,21 +19,21 @@ namespace Software_2.Controllers
     {
         private readonly UsuarioService _usuarioService;
         private readonly IConfiguration _config;
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _context; 
         private readonly EmailTemplateService _emailTemplateService;
         private readonly EmailManager _emailManager;
+
 
         public UsuarioController(
             UsuarioService usuarioService,
             IConfiguration config,
             AppDbContext context,
             EmailTemplateService emailTemplateService,
-            EmailManager emailManager
-            )
+            EmailManager emailManager)
         {
             _usuarioService = usuarioService;
             _config = config;
-            _context = context;
+            _context = context; 
             _emailTemplateService = emailTemplateService;
             _emailManager = emailManager;
         }
@@ -107,6 +107,10 @@ namespace Software_2.Controllers
 
         private (string TokenString, DateTime Expires) GenerateJwtToken(Usuario usuario)
         {
+          
+            var rol = _context.Roles.FirstOrDefault(r => r.IdRol == usuario.IdRol);
+            var nombreRol = rol?.NombreRol ?? "Donante"; 
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
             var expires = DateTime.UtcNow.AddMinutes(_config.GetValue<int>("Jwt:AccessTokenExpireMinutes"));
@@ -115,10 +119,10 @@ namespace Software_2.Controllers
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-            new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
-            new Claim(ClaimTypes.Email, usuario.CorreoUsuario),
-            new Claim(ClaimTypes.Role, usuario.IdRol.ToString())
-        }),
+                    new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+                    new Claim(ClaimTypes.Email, usuario.CorreoUsuario),
+                    new Claim(ClaimTypes.Role, nombreRol)
+                }),
                 Expires = expires,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
@@ -216,7 +220,7 @@ namespace Software_2.Controllers
         }
 
         [HttpGet("{id}/ObtenerUno")]
-        [Authorize]
+        [Authorize(Roles = "Administrador")]
         public IActionResult ObtenerUsuario(int id)
         {
             var usuario = _usuarioService.ObtenerUsuario(id);
@@ -228,7 +232,7 @@ namespace Software_2.Controllers
         }
 
         [HttpGet("/Obtener todos")]
-        [Authorize]
+        [Authorize(Roles = "Administrador")]
         public IActionResult ListarUsuarios()
         {
             List<Usuario> usuarios = _usuarioService.ListarUsuarios();
@@ -236,7 +240,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPut("{id}/Modificar")]
-        [Authorize]
+        [Authorize(Roles = "Administrador")]
         public IActionResult ModificarUsuario(int id, [FromBody] UsuarioUpdateDTO usuarioDTO)
         {
             try
@@ -304,7 +308,7 @@ namespace Software_2.Controllers
         }
 
         [HttpDelete("{id}/Eliminar(desactivar)")]
-        [Authorize]
+        [Authorize(Roles = "Administrador")]
         public IActionResult EliminarUsuario(int id)
         {
             try
@@ -336,7 +340,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPatch("{id}/Reactivar")]
-        [Authorize]
+        [Authorize(Roles = "Administrador")]
         public IActionResult ReactivarUsuario(int id)
         {
             try
@@ -363,6 +367,32 @@ namespace Software_2.Controllers
                     Error = "Error al reactivar usuario",
                     Detalle = ex.Message
                 });
+            }
+        }
+
+        [HttpPut("{id}/ActualizarRol")]
+        [Authorize(Roles = "Administrador")] 
+        public IActionResult ActualizarRol(int id, [FromBody] ActualizarRolDTO dto)
+        {
+            try
+            {
+                var usuario = _context.Usuarios.Find(id);
+                if (usuario == null)
+                    return NotFound("Usuario no encontrado.");
+
+               
+                var rolExiste = _context.Roles.Any(r => r.IdRol == dto.NuevoIdRol);
+                if (!rolExiste)
+                    return BadRequest("El rol especificado no existe.");
+
+                usuario.IdRol = dto.NuevoIdRol;
+                _context.SaveChanges();
+
+                return Ok(new { Mensaje = "Rol actualizado correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
             }
         }
 

@@ -27,6 +27,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPost("/CrearFundacion")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult RegistrarFundacion([FromBody] FundacionDTO fundacionDTO)
         {
             try
@@ -58,6 +59,8 @@ namespace Software_2.Controllers
         }
 
         [HttpGet("{id}/ObtenerUno")]
+        [AllowAnonymous]
+
         public IActionResult ObtenerFundacion(int id)
         {
             var fundacion = _fundacionService.ObtenerFundacion(id);
@@ -73,6 +76,7 @@ namespace Software_2.Controllers
         }
 
         [HttpGet("/ObtenerTodas")]
+        [AllowAnonymous]
         public IActionResult ListarFundaciones()
         {
             var fundaciones = _fundacionService.ListarFundaciones();
@@ -84,6 +88,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPut("{id}/Modificar")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult ModificarFundacion(int id, [FromBody] FundacionUpdateDTO fundacionDTO)
         {
             try
@@ -94,7 +99,6 @@ namespace Software_2.Controllers
                 if (fundacionExistente == null)
                     return NotFound(new { Error = $"Fundación con ID {id} no encontrada" });
 
-                // Actualización condicional
                 if (!string.IsNullOrWhiteSpace(fundacionDTO.NombreLegal))
                     fundacionExistente.NombreLegal = fundacionDTO.NombreLegal;
 
@@ -136,6 +140,7 @@ namespace Software_2.Controllers
         }
 
         [HttpDelete("{id}/Eliminar")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult EliminarFundacion(int id)
         {
             try
@@ -166,6 +171,7 @@ namespace Software_2.Controllers
         }
 
         [HttpPatch("{id}/Reactivar")]
+        [Authorize(Roles = "Fundacion, Administrador")]
         public IActionResult ReactivarFundacion(int id)
         {
             try
@@ -196,6 +202,7 @@ namespace Software_2.Controllers
         }
       
         [HttpGet("{id}/donaciones")]
+        [AllowAnonymous]
         public IActionResult ObtenerDonacionesPorFundacion(
             int id,
             [FromQuery] int pagina = 1,
