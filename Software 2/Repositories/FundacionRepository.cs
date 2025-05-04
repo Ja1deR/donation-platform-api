@@ -118,6 +118,46 @@ namespace Software_2.Repositories
                 }
             }
         }
+        public List<DonacionResponseDTO> ObtenerDonacionesHistoricas(int idFundacion, int pagina, int tamanoPagina, out int totalRegistros)
+        {
+            var donaciones = new List<DonacionResponseDTO>();
+            totalRegistros = 0;
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("GetDonacionesHistoricas", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                command.Parameters.AddWithValue("@ID_fundacion", idFundacion);
+                command.Parameters.AddWithValue("@Pagina", pagina);
+                command.Parameters.AddWithValue("@TamanoPagina", tamanoPagina);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        donaciones.Add(new DonacionResponseDTO
+                        {
+                            IdDonacion = reader.GetInt32("ID_donacion"),
+                            NombreDonante = reader.GetString("NombreDonante"),
+                            Cantidad = reader.GetInt32("Cantidad"),
+                            FechaDonacion = reader.GetDateTime("Fecha_donacion"),
+                            Estado = reader.GetString("Estado"),
+                            Publicacion = reader.IsDBNull("Publicacion") ? null : reader.GetString("Publicacion")
+                        });
+                    }
+
+                    // Obtener total de registros
+                    if (reader.NextResult() && reader.Read())
+                    {
+                        totalRegistros = reader.GetInt32("TotalRegistros");
+                    }
+                }
+            }
+            return donaciones;
+        }
         private Fundación MapearFundacion(SqlDataReader reader)
         {
             return new Fundación
