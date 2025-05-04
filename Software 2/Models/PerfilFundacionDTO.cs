@@ -13,13 +13,5 @@ namespace Software_2.Models
         public DateTime FechaRegistro { get; set; }
     }
 
-    public class PublicacionConDonacionesDTO
-    {
-        public int IdPublicacion { get; set; }
-        public string NombrePublicacion { get; set; }
-        public int DonacionesRecibidas { get; set; }
-        public int? MetaCantidad { get; set; }
-        public decimal PorcentajeCumplimiento => MetaCantidad.HasValue && MetaCantidad > 0 ?
-            (decimal)DonacionesRecibidas / MetaCantidad.Value * 100 : 0;
-    }
+    
 }

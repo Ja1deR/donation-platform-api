@@ -2,6 +2,7 @@
 using Software_2.Models;
 using System.Data;
 
+
 namespace Software_2.Repositories
 {
     public class PublicacionRepository
@@ -150,6 +151,38 @@ namespace Software_2.Repositories
 
                 command.ExecuteNonQuery();
             }
+        }
+      
+        public List<PublicacionConDonacionesDTO> ObtenerPublicacionesActivasConProgreso(int idFundacion)
+        {
+            var publicaciones = new List<PublicacionConDonacionesDTO>();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("GetPublicacionesActivasConProgreso", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+                command.Parameters.AddWithValue("@ID_fundacion", idFundacion);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        publicaciones.Add(new PublicacionConDonacionesDTO
+                        {
+                            IdPublicacion = reader.GetInt32("ID_publicacion"),
+                            NombrePublicacion = reader.GetString("Nombre_publicacion"),
+                            Descripcion = reader.GetString("Descripción"), 
+                            FechaInicio = reader.GetDateTime("Fecha_inicio"),
+                            FechaFin = reader.IsDBNull("Fecha_fin") ? null : reader.GetDateTime("Fecha_fin"),
+                            DonacionesRecibidas = reader.GetInt32("DonacionesRecibidas"),
+                            MetaCantidad = reader.IsDBNull("Meta_cantidad") ? (int?)null : reader.GetInt32("Meta_cantidad"),
+                        });
+                    }
+                }
+            }
+            return publicaciones;
         }
 
     }

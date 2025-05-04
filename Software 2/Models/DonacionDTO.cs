@@ -13,7 +13,7 @@ namespace Software_2.Models
         public int Cantidad { get; set; }
 
         [StringLength(500, ErrorMessage = "Máximo 500 caracteres")]
-        [JsonPropertyName("descripcionDonacion")] // 🔄 Mapea al JSON sin tilde
+        [JsonPropertyName("descripcionDonacion")] 
         public string? DescripcionDonacion { get; set; }
 
         [StringLength(255, ErrorMessage = "Máximo 255 caracteres")]

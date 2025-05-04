@@ -12,10 +12,18 @@ namespace Software_2.Controllers
     public class FundacionController : ControllerBase
     {
         private readonly FundacionService _fundacionService;
+        private readonly PublicacionService _publicacionService;
+        private readonly DonacionService _donacionService; 
 
-        public FundacionController(FundacionService fundacionService)
+        
+        public FundacionController(
+            FundacionService fundacionService,
+            PublicacionService publicacionService, 
+            DonacionService donacionService) 
         {
             _fundacionService = fundacionService;
+            _publicacionService = publicacionService; 
+            _donacionService = donacionService; 
         }
 
         [HttpPost("/CrearFundacion")]
@@ -186,7 +194,7 @@ namespace Software_2.Controllers
                 });
             }
         }
-        // FundacionController.cs
+      
         [HttpGet("{id}/donaciones")]
         public IActionResult ObtenerDonacionesPorFundacion(
             int id,
@@ -210,6 +218,35 @@ namespace Software_2.Controllers
                     TotalRegistros = totalRegistros,
                     Donaciones = donaciones
                 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+  
+        [HttpGet("{id}/perfil")]
+        [AllowAnonymous] 
+        public IActionResult ObtenerPerfilFundacion(int id)
+        {
+            try
+            {
+                var fundacion = _fundacionService.ObtenerFundacion(id);
+                if (fundacion == null || !fundacion.Activa.GetValueOrDefault())
+                    return NotFound("Fundación no encontrada o inactiva");
+
+                var perfil = new PerfilFundacionDTO
+                {
+                    IdFundacion = fundacion.IdFundacion,
+                    NombreLegal = fundacion.NombreLegal,
+                    Descripcion = fundacion.Descripción ?? "Sin descripción",
+                    SitioWeb = fundacion.SitioWeb,
+                    FechaRegistro = fundacion.FechaRegistro,
+                    PublicacionesActivas = _publicacionService.ObtenerPublicacionesActivasConProgreso(id),
+                    TotalDonacionesHistoricas = _donacionService.ObtenerTotalDonacionesPorFundacion(id)
+                };
+
+                return Ok(perfil);
             }
             catch (Exception ex)
             {
