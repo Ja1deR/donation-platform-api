@@ -2,6 +2,7 @@
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Software_2.Helpers;
 using Software_2.Models;
 using Software_2.Services;
 
@@ -14,13 +15,25 @@ namespace Software_2.Controllers
     {
         private readonly DonacionService _donacionService;
         private readonly PublicacionService _publicacionService;
+        private readonly UsuarioService _usuarioService;
+        private readonly FundacionService _fundacionService;
+        private readonly EmailTemplateService _emailTemplateService; // ✅ Nueva dependencia
+        private readonly EmailManager _emailManager; // ✅ Nueva dependencia
 
         public DonacionesController(
             DonacionService donacionService,
-            PublicacionService publicacionService)
+            PublicacionService publicacionService,
+            UsuarioService usuarioService,
+            FundacionService fundacionService,
+            EmailTemplateService emailTemplateService, // ✅ Inyectar
+            EmailManager emailManager) // ✅ Inyectar
         {
             _donacionService = donacionService;
             _publicacionService = publicacionService;
+            _usuarioService = usuarioService;
+            _fundacionService = fundacionService;
+            _emailTemplateService = emailTemplateService;
+            _emailManager = emailManager;
         }
 
         [HttpPost]
@@ -30,25 +43,47 @@ namespace Software_2.Controllers
             {
                 var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
+                // Validar publicación
                 var publicacion = _publicacionService.ObtenerPublicacion(donacionDTO.IdPublicacion);
                 if (publicacion == null || !publicacion.Activa.GetValueOrDefault())
                     return BadRequest("Publicación no válida");
                 if (!publicacion.IdCategoriaDonacion.HasValue)
                     return BadRequest("La publicación no tiene una categoría válida");
 
+                // Crear donación (IdPublicacion es obligatorio por el DTO)
                 var donacion = new Donacione
                 {
                     IdUsuarioDonante = currentUserId,
                     IdFundacion = publicacion.IdFundacion,
-                    IdPublicacion = donacionDTO.IdPublicacion,
+                    IdPublicacion = donacionDTO.IdPublicacion, // ✅ Siempre tiene valor
                     IdCategoriaDonacion = publicacion.IdCategoriaDonacion.Value,
                     Cantidad = donacionDTO.Cantidad,
                     DescripciónDonacion = donacionDTO.DescripcionDonacion,
                     Ubicacion = donacionDTO.Ubicacion,
-                    IdEstado = 1 // Estado inicial (Ej: 'Pendiente')
+                    IdEstado = 1
                 };
 
                 _donacionService.CrearDonacion(donacion, currentUserId);
+
+                // Obtener datos para el email (IdPublicacion no es nulo aquí)
+                var usuarioDonante = _usuarioService.ObtenerUsuario(currentUserId);
+                var fundacion = _fundacionService.ObtenerFundacion(donacion.IdFundacion);
+                var publicacionDonacion = _publicacionService.ObtenerPublicacion(donacion.IdPublicacion!.Value);
+
+                // Construir y enviar email
+                string htmlContent = _emailTemplateService.ConstruirMensajeDonacion(
+                    usuarioDonante.NombreUsuario,
+                    donacion.Cantidad,
+                    fundacion.NombreLegal,
+                    publicacionDonacion?.NombrePublicacion ?? "Necesidad General"
+                );
+
+                _emailManager.EnviarCorreo(
+                    usuarioDonante.CorreoUsuario,
+                    "¡Gracias por tu donación!",
+                    htmlContent,
+                    true
+                );
 
                 return Ok(new { Mensaje = "Donación registrada exitosamente" });
             }
@@ -57,6 +92,7 @@ namespace Software_2.Controllers
                 return StatusCode(500, new { Error = ex.Message });
             }
         }
+
 
         [HttpGet("fundacion/{idFundacion}")]
         public IActionResult ObtenerDonacionesPorFundacion(int idFundacion)
@@ -85,7 +121,7 @@ namespace Software_2.Controllers
                 return StatusCode(500, new { Error = ex.Message });
             }
         }
-        // Controllers/DonacionesController.cs
+        
         [HttpPost("GenerarReporteExcel")]
         public IActionResult GenerarReporteExcel([FromBody] ReporteFiltroDTO filtro)
         {
