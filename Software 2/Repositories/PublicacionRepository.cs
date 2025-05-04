@@ -173,11 +173,12 @@ namespace Software_2.Repositories
                         {
                             IdPublicacion = reader.GetInt32("ID_publicacion"),
                             NombrePublicacion = reader.GetString("Nombre_publicacion"),
-                            Descripcion = reader.GetString("Descripción"), 
+                            Descripcion = reader.GetString("Descripción"),
                             FechaInicio = reader.GetDateTime("Fecha_inicio"),
                             FechaFin = reader.IsDBNull("Fecha_fin") ? null : reader.GetDateTime("Fecha_fin"),
                             DonacionesRecibidas = reader.GetInt32("DonacionesRecibidas"),
                             MetaCantidad = reader.IsDBNull("Meta_cantidad") ? (int?)null : reader.GetInt32("Meta_cantidad"),
+                            PorcentajeCumplimiento = reader.GetDecimal("PorcentajeCumplimiento") 
                         });
                     }
                 }
