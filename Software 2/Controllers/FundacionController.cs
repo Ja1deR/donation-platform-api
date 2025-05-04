@@ -186,5 +186,36 @@ namespace Software_2.Controllers
                 });
             }
         }
+        // FundacionController.cs
+        [HttpGet("{id}/donaciones")]
+        public IActionResult ObtenerDonacionesPorFundacion(
+            int id,
+            [FromQuery] int pagina = 1,
+            [FromQuery] int tamanoPagina = 10)
+        {
+            try
+            {
+                int totalRegistros;
+                var donaciones = _fundacionService.ObtenerDonacionesHistoricas(
+                    id,
+                    pagina,
+                    tamanoPagina,
+                    out totalRegistros
+                );
+
+                return Ok(new
+                {
+                    Pagina = pagina,
+                    TotalPaginas = (int)Math.Ceiling(totalRegistros / (double)tamanoPagina),
+                    TotalRegistros = totalRegistros,
+                    Donaciones = donaciones
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
     }
 }

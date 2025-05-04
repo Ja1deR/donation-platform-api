@@ -10,7 +10,7 @@ public partial class Donacione
 
     public int IdCategoriaDonacion { get; set; }
 
-    public int? Cantidad { get; set; }
+    public int Cantidad { get; set; }
 
     public string? DescripciónDonacion { get; set; }
 

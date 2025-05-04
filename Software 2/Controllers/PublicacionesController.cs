@@ -71,11 +71,11 @@ namespace Software_2.Controllers
         {
             try
             {
-                var publicaciones = _publicacionService.ListarPublicaciones(pagina, tamanoPagina, categoriaId);
+                var (publicaciones, totalPaginas) = _publicacionService.ListarPublicaciones(pagina, tamanoPagina, categoriaId);
                 return Ok(new
                 {
                     Pagina = pagina,
-                    TotalPaginas = (int)Math.Ceiling(publicaciones.Count / (double)tamanoPagina),
+                    TotalPaginas = totalPaginas,
                     Publicaciones = publicaciones
                 });
             }
@@ -101,6 +101,46 @@ namespace Software_2.Controllers
                     Publicacion = publicacion,
                     Progreso = progreso
                 });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/Desactivar")]
+        public IActionResult DesactivarPublicacion(int id)
+        {
+            try
+            {
+                var publicacion = _publicacionService.ObtenerPublicacion(id);
+                if (publicacion == null)
+                    return NotFound("Publicación no encontrada");
+
+                publicacion.Activa = false;
+                _publicacionService.ActualizarPublicacion(publicacion);
+
+                return Ok(new { Mensaje = "Publicación desactivada" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/Reactivar")]
+        public IActionResult ReactivarPublicacion(int id)
+        {
+            try
+            {
+                var publicacion = _publicacionService.ObtenerPublicacion(id);
+                if (publicacion == null)
+                    return NotFound("Publicación no encontrada");
+
+                publicacion.Activa = true;
+                _publicacionService.ActualizarPublicacion(publicacion);
+
+                return Ok(new { Mensaje = "Publicación reactivada exitosamente" });
             }
             catch (Exception ex)
             {

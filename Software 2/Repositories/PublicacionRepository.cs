@@ -36,8 +36,9 @@ namespace Software_2.Repositories
             }
         }
 
-        public List<Publicacione> ListarPublicaciones(int pagina, int tamanoPagina, int? categoriaId)
+        public List<Publicacione> ListarPublicaciones(int pagina, int tamanoPagina, int? categoriaId, out int totalRegistros)
         {
+            totalRegistros = 0;
             var publicaciones = new List<Publicacione>();
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -58,7 +59,7 @@ namespace Software_2.Repositories
                         publicaciones.Add(new Publicacione
                         {
                             IdPublicacion = reader.GetInt32("ID_publicacion"),
-                            IdFundacion = reader.GetInt32("ID_fundacion"), // ✅ Ahora existe
+                            IdFundacion = reader.GetInt32("ID_fundacion"),
                             NombrePublicacion = reader.GetString("Nombre_publicacion"),
                             Descripción = reader.GetString("Descripción"),
                             FechaInicio = reader.GetDateTime("Fecha_inicio"),
@@ -66,6 +67,12 @@ namespace Software_2.Repositories
                             MetaCantidad = reader.IsDBNull("Meta_cantidad") ? null : reader.GetInt32("Meta_cantidad"),
                             IdCategoriaDonacion = reader.IsDBNull("ID_categoria_donacion") ? null : reader.GetInt32("ID_categoria_donacion")
                         });
+                    }
+
+                    // Leer el total de registros si hay un segundo resultado (si se usa un DataSet)
+                    if (reader.NextResult() && reader.Read())
+                    {
+                        totalRegistros = reader.GetInt32("TotalRegistros");
                     }
                 }
             }
@@ -120,6 +127,28 @@ namespace Software_2.Repositories
                     }
                     return null;
                 }
+            }
+        }
+        public void ActualizarPublicacion(Publicacione publicacion, int currentUserId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("UpdatePublicacion", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                command.Parameters.AddWithValue("@ID_publicacion", publicacion.IdPublicacion);
+                command.Parameters.AddWithValue("@Nombre_publicacion", publicacion.NombrePublicacion);
+                command.Parameters.AddWithValue("@Descripcion", publicacion.Descripción);
+                command.Parameters.AddWithValue("@Fecha_fin", publicacion.FechaFin ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Meta_cantidad", publicacion.MetaCantidad ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@ID_categoria_donacion", publicacion.IdCategoriaDonacion ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Activa", publicacion.Activa);
+                command.Parameters.AddWithValue("@CurrentUserID", currentUserId);
+
+                command.ExecuteNonQuery();
             }
         }
 
