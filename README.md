@@ -5,7 +5,6 @@ A RESTful API for a community donation platform built with **ASP.NET Core**. Use
 ![C#](https://img.shields.io/badge/C%23-ASP.NET_Core-512BD4?style=flat-square&logo=dotnet&logoColor=white)
 ![JWT](https://img.shields.io/badge/Auth-JWT-black?style=flat-square&logo=jsonwebtokens)
 ![Architecture](https://img.shields.io/badge/Architecture-Layered_MVC-blue?style=flat-square)
-![Commits](https://img.shields.io/badge/Commits-56-success?style=flat-square)
 
 ---
 
